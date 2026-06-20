@@ -16,7 +16,7 @@
   }
 
   // 敵へのダメージ計算(共通)。
-  //   通常: base = 敵の元最大HP × baseRatio に ±randomRange の乱数(負数含む)を加算。
+  //   通常: attackBase(絶対値) に ±randomRange の乱数(負数含む)を加算。HP依存しない。
   //   かいしんのいちげき: critChance の確率で、元最大HP × [critMinRatio, critMaxRatio] の大ダメージ。
   // 戻り値: { damage:Number, crit:Boolean }
   function rollDamage(maxHp, cfg) {
@@ -29,14 +29,29 @@
       const ratio = lo + Math.random() * (hi - lo);
       return { damage: Math.max(min, Math.round(maxHp * ratio)), crit: true };
     }
-    const base = maxHp * (cfg.baseRatio != null ? cfg.baseRatio : 0.3);
+    // 通常ダメージは敵HPに依存しない絶対値基準(attackBase)。
+    // → HPが多い敵ほど撃破に多くのターンが必要になる。
+    // (旧baseRatio指定も後方互換として残す)
+    const baseAbs =
+      cfg.attackBase != null ? cfg.attackBase : maxHp * (cfg.baseRatio != null ? cfg.baseRatio : 0.3);
     const rnd = (Math.random() * 2 - 1) * (cfg.randomRange || 0);
-    return { damage: Math.max(min, Math.round(base + rnd)), crit: false };
+    return { damage: Math.max(min, Math.round(baseAbs + rnd)), crit: false };
   }
 
   // リズムの曲をランダムに選ぶ(song-select の value を書き換える)
   function pickRandomSong() {
     const sel = $("song-select");
+    if (sel && sel.options && sel.options.length) {
+      const i = Math.floor(Math.random() * sel.options.length);
+      sel.value = sel.options[i].value;
+      return sel.options[i].textContent || sel.value;
+    }
+    return null;
+  }
+
+  // リズムのタップパターンをランダムに選ぶ(pattern-select の value を書き換える)
+  function pickRandomPattern() {
+    const sel = $("pattern-select");
     if (sel && sel.options && sel.options.length) {
       const i = Math.floor(Math.random() * sel.options.length);
       sel.value = sel.options[i].value;
@@ -122,11 +137,15 @@
         showStage("rhythm");
         clearRhythmResult();
         const songName = pickRandomSong(); // 曲をランダムに
+        const patName = pickRandomPattern(); // タップパターンもランダムに
         const startBtn = $("start-btn");
         if (startBtn) startBtn.disabled = false;
         const base = prompt || "下の［戦闘開始］を押してリズムを開始してください";
-        $("bv-rhythm-prompt").textContent =
-          base + (songName ? "（曲: " + songName + "）" : "");
+        const extra =
+          (songName ? "（曲: " + songName : "") +
+          (patName ? (songName ? " / タップ: " : "（タップ: ") + patName : "") +
+          (songName || patName ? "）" : "");
+        $("bv-rhythm-prompt").textContent = base + extra;
         let done = false;
         window.RhythmBridge = {
           onRoundEnd: (r) => {

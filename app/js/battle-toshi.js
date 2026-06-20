@@ -18,11 +18,11 @@
 
     // クイズ正解時の敵ダメージ(BattleCore.rollDamage と共通仕様)
     DAMAGE: {
-      baseRatio: 0.30,
+      attackBase: 22, // HPに依存しない絶対ダメージ基準(最弱HP20は約1発、HP75は3〜4発)
       randomRange: 8,
       min: 1,
       critChance: 0.02, // かいしんのいちげき(極低確率・将来パラメータ化)
-      critMinRatio: 0.70,
+      critMinRatio: 0.70, // 会心: 敵の元最大HPの70〜90%
       critMaxRatio: 0.90,
     },
 

@@ -1,10 +1,10 @@
 // =====================================================
 // battle-tantan.js  -- たんたん案
 // 流れ:
-//   1. リズムゲーム(曲ランダム)を行う。獲得点数によって選択肢数が絞られる。
-//   2. クイズ表示。正解=敵にダメージ(30%基準±乱数 + かいしんのいちげき) /
+//   1. リズムゲーム(曲・タップパターンともランダム)を行う。獲得点数で選択肢数が絞られる。
+//   2. クイズ表示。正解=敵にダメージ(絶対値基準±乱数 + かいしんのいちげき) /
 //      不正解=自分にダメージ。
-//   3. 解説は問題ごとに表示。
+//   3. 解説は「バトル後」にまとめて表示(トシ案と同様)。
 //   4. どちらかの HP が 0 になるまで繰り返す。
 // =====================================================
 (function () {
@@ -18,11 +18,11 @@
     WRONG_FIXED_DAMAGE: 12,
     // 敵へのダメージ(BattleCore.rollDamage と共通仕様)
     DAMAGE: {
-      baseRatio: 0.30, // 敵の元最大HPの30%を基準
+      attackBase: 22, // HPに依存しない絶対ダメージ基準(最弱HP20は約1発、HP75は3〜4発)
       randomRange: 8, // ±8の一様乱数(負数含む)
-      min: 1, // 下限
-      critChance: 0.02, // かいしんのいちげき発生率(極低確率・将来パラメータ化)
-      critMinRatio: 0.70, // 会心時ダメージ: 元最大HPの70%〜
+      min: 1,
+      critChance: 0.02, // かいしんのいちげき(極低確率・将来パラメータ化)
+      critMinRatio: 0.70, // 会心時: 敵の元最大HPの70%〜
       critMaxRatio: 0.90, // 〜90%
     },
   };
@@ -33,10 +33,16 @@
     return 4;
   }
 
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
   async function run(core) {
     const enemy = core.state.enemy;
+    const learned = []; // バトル後にまとめて表示する解説
+
     while (!core.isOver()) {
-      // 1. リズムラウンド(曲ランダム)
+      // 1. リズムラウンド(曲・パターンともランダム)
       const rr = await core.runRhythmRound(
         "リズムラウンド: ［戦闘開始］を押して演奏。スコアで選択肢数が決まります"
       );
@@ -47,9 +53,10 @@
         "info"
       );
 
-      // 2. クイズ
+      // 2. クイズ(解説はバトル後にまとめて出すため、ここでは出さない)
       const quiz = window.QuizEngine.next(choiceCount);
-      const ans = await core.showQuiz(quiz, { revealExplanation: true });
+      const ans = await core.showQuiz(quiz, { revealExplanation: false });
+      learned.push(quiz);
 
       // 3. ダメージ処理
       if (ans.correct) {
@@ -67,10 +74,20 @@
       }
     }
 
-    // 4. 決着
+    // 4. 決着 + 解説まとめ(勝利時)
     const outcome = core.result();
-    core.showFinish(outcome);
-    core.log(outcome === "win" ? "そらドラゴンを撃破した!" : "力尽きてしまった...", "info");
+    let html = "";
+    if (outcome === "win") {
+      html += '<p class="bv-finish-lead">出題された問題の解説</p>';
+      learned.forEach((q, i) => {
+        html +=
+          '<div class="bv-explain-item"><strong>Q' + (i + 1) + ". " +
+          escapeHtml(q.question.replace(/\n/g, " ")) + "</strong><p>" +
+          escapeHtml(q.explanation) + "</p></div>";
+      });
+    }
+    core.showFinish(outcome, html);
+    core.log(outcome === "win" ? enemy.name + "を撃破した!" : "力尽きてしまった...", "info");
   }
 
   window.BattleTantan = { run, CONFIG };

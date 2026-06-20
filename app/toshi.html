@@ -10,7 +10,7 @@
 <body>
 <div class="bv-app">
   <h1 class="bv-title">クイズ→リズム式バトル<span class="badge">トシ案(改)</span></h1>
-  <p class="bv-nav"><a href="./index.html">← 方式選択へ戻る</a> ／ 敵: そらドラゴン(固定)</p>
+  <p class="bv-nav"><a href="./index.html">← 方式選択へ戻る</a> ／ 敵: ランダム出現</p>
 
   <header class="bv-header">
     <div class="bv-enemy-row">
@@ -32,13 +32,13 @@
   </header>
 
   <section id="bv-intro" class="bv-stage">
-    <p>クイズに答えてリズムへ。リズムの役割は下で選べます。解説は勝利後にまとめて表示します。</p>
+    <p>クイズに答えてリズムへ。リズムの役割は下で選べます（既定=防御専用）。解説は勝利後にまとめて表示。敵はランダム出現。</p>
     <div class="bv-mode">
       <p class="bv-mode-title">リズムの役割を選択:</p>
-      <label class="bv-mode-opt"><input type="radio" name="bv-rhythm-mode" value="attack" checked>
-        <span><strong>攻撃型</strong>：クイズ正解で守備半減 → リズムクリアで敵にダメージ／時間切れで被弾</span></label>
-      <label class="bv-mode-opt"><input type="radio" name="bv-rhythm-mode" value="defense">
-        <span><strong>防御専用</strong>：攻撃はクイズ正解で。リズムは自分の被ダメージのみに関与（スコアが高いほど軽減）</span></label>
+      <label class="bv-mode-opt"><input type="radio" name="bv-rhythm-mode" value="defense" checked>
+        <span><strong>防御専用（既定）</strong>：攻撃はクイズ正解で。リズムは自分の被ダメージのみに関与（スコアが高いほど軽減）</span></label>
+      <label class="bv-mode-opt"><input type="radio" name="bv-rhythm-mode" value="attack">
+        <span><strong>攻撃型</strong>：クイズ正解で敵にダメージ → リズムクリアでさらに敵にダメージ／時間切れで被弾</span></label>
     </div>
     <button id="bv-start" class="bv-btn">戦闘開始</button>
   </section>
@@ -171,27 +171,31 @@
 </div>
 
   <script src="./js/rhythm-battle-poc.js?v=27"></script>
-  <script src="./js/enemy-loader.js?v=1"></script>
+  <script src="./js/enemy-loader.js?v=2"></script>
   <script src="./js/quiz-engine.js?v=1"></script>
-  <script src="./js/battle-core.js?v=6"></script>
-  <script src="./js/battle-toshi.js?v=6"></script>
+  <script src="./js/battle-core.js?v=7"></script>
+  <script src="./js/battle-toshi.js?v=7"></script>
   <script>
     (async function () {
       const FLOW = window.BattleToshi;
       let enemy, core = null;
       try {
-        enemy = await EnemyLoader.loadEnemy("enemy_008");
+        await EnemyLoader.loadAll();
         await QuizEngine.load();
       } catch (e) {
         document.getElementById("bv-intro").innerHTML =
           '<p style="color:#ff6b6b">データ読込に失敗しました。ローカルサーバ経由で開いてください(README参照)。<br>' + e.message + '</p>';
         return;
       }
+      // イントロ用にランダムな敵をプレビュー
+      enemy = EnemyLoader.random();
       core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
       document.getElementById("bv-start").addEventListener("click", function () {
+        // 対戦ごとに敵をランダム抽選
+        enemy = EnemyLoader.random();
         core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
         var modeEl = document.querySelector('input[name="bv-rhythm-mode"]:checked');
-        FLOW.run(core, { mode: modeEl ? modeEl.value : "attack" });
+        FLOW.run(core, { mode: modeEl ? modeEl.value : "defense" });
       });
       document.getElementById("bv-restart").addEventListener("click", function () {
         location.reload();
