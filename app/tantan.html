@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>リズム→クイズ式バトル</title>
   <link rel="stylesheet" href="./css/rhythm-battle-poc.css?v=16">
-  <link rel="stylesheet" href="./css/battle-verify.css?v=1">
+  <link rel="stylesheet" href="./css/battle-verify.css?v=2">
 </head>
 <body>
 <div class="bv-app">
@@ -33,7 +33,7 @@
 
   <section id="bv-intro" class="bv-stage">
     <p>リズムゲームのスコアでクイズの選択肢数が決まります。正解で敵に、不正解で自分にダメージ。解説は毎問表示。どちらかのHPが0になるまで繰り返します。</p>
-    
+
     <button id="bv-start" class="bv-btn">戦闘開始</button>
   </section>
 
@@ -149,6 +149,7 @@
       <div id="log" class="log"></div>
     </section>
     </div>
+    <button id="bv-rhythm-next" class="bv-btn hidden">次へ</button>
   </section>
 
   <section id="bv-finish" class="bv-stage hidden">
@@ -166,8 +167,8 @@
   <script src="./js/rhythm-battle-poc.js?v=27"></script>
   <script src="./js/enemy-loader.js?v=1"></script>
   <script src="./js/quiz-engine.js?v=1"></script>
-  <script src="./js/battle-core.js?v=1"></script>
-  <script src="./js/battle-tantan.js?v=1"></script>
+  <script src="./js/battle-core.js?v=2"></script>
+  <script src="./js/battle-tantan.js?v=2"></script>
   <script>
     (async function () {
       const FLOW = window.BattleTantan;
@@ -180,10 +181,8 @@
           '<p style="color:#ff6b6b">データ読込に失敗しました。ローカルサーバ経由で開いてください(README参照)。<br>' + e.message + '</p>';
         return;
       }
-      // イントロ用にヘッダーをプレビュー描画
       core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
       document.getElementById("bv-start").addEventListener("click", function () {
-        // 開始時に状態を作り直す
         core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
         FLOW.run(core);
       });

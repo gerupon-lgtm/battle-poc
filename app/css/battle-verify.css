@@ -105,3 +105,11 @@ body {
 .bv-log-line.good { color: var(--bv-good); }
 .bv-log-line.bad { color: var(--bv-bad); }
 .bv-log-line.info { color: var(--bv-muted); }
+
+/* --- トシ案: リズム役割の選択 --- */
+.bv-mode { background: #141a28; border-radius: 10px; padding: 12px 14px; margin: 4px 0 16px; }
+.bv-mode-title { margin: 0 0 8px; font-size: 13px; color: var(--bv-accent); }
+.bv-mode-opt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; font-size: 13px; line-height: 1.6; cursor: pointer; }
+.bv-mode-opt input { margin-top: 3px; }
+.bv-mode-opt strong { color: var(--bv-text); }
+#bv-rhythm-next { margin-top: 14px; }

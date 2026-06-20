@@ -42,8 +42,7 @@
       const el = document.createElement("div");
       el.className = "bv-log-line" + (kind ? " " + kind : "");
       el.textContent = msg;
-      const box = $("bv-log");
-      box.prepend(el);
+      $("bv-log").prepend(el);
       state.onLog(msg, kind);
     }
 
@@ -70,11 +69,28 @@
       });
     }
 
-    // リズムラウンドを1回実行する。ユーザーがリズムパネル内の[戦闘開始]を
-    // 押すと開始し、撃破 or 時間切れで {score, combo, cleared} を解決する。
+    // 前ターンのリズム結果表示を消す
+    function clearRhythmResult() {
+      const res = $("battle-result");
+      if (res) {
+        res.hidden = true;
+        res.className = "battle-result";
+      }
+      const next = $("bv-rhythm-next");
+      if (next) next.classList.add("hidden");
+    }
+
+    // リズムラウンドを1回実行する。
+    // ユーザーがリズムパネル内の[戦闘開始]を押すと開始し、撃破 or 時間切れで
+    // 結果(撃破！/時間切れ)を表示する。結果は表示したまま保持し、ユーザーが
+    // ［次へ］を押してから {score, combo, cleared} を解決する(=次のターンへ進む)。
+    // 二回目以降は開始前に前ターンの結果表示をクリアする。
     function runRhythmRound(prompt) {
       return new Promise((resolve) => {
         showStage("rhythm");
+        clearRhythmResult();
+        const startBtn = $("start-btn");
+        if (startBtn) startBtn.disabled = false;
         $("bv-rhythm-prompt").textContent =
           prompt || "下の［戦闘開始］を押してリズムを開始してください";
         let done = false;
@@ -83,7 +99,16 @@
             if (done) return;
             done = true;
             window.RhythmBridge.onRoundEnd = null;
-            resolve(r);
+            // 結果(撃破！/時間切れ)は表示したまま、確認を待つ
+            if (startBtn) startBtn.disabled = true; // 再演奏を防止
+            $("bv-rhythm-prompt").textContent =
+              "リズム結果を確認して［次へ］を押してください";
+            const next = $("bv-rhythm-next");
+            next.classList.remove("hidden");
+            next.onclick = () => {
+              next.classList.add("hidden");
+              resolve(r);
+            };
           },
         };
       });
@@ -109,13 +134,11 @@
           btn.className = "bv-choice";
           btn.textContent = c.text;
           btn.addEventListener("click", function onPick() {
-            // 二重回答防止
             Array.from(wrap.children).forEach((b) => (b.disabled = true));
             if (c.correct) {
               btn.classList.add("correct");
             } else {
               btn.classList.add("wrong");
-              // 正解も明示
               Array.from(wrap.children).forEach((b, i) => {
                 if (quiz.choices[i].correct) b.classList.add("correct");
               });
@@ -124,13 +147,9 @@
             if (opts.revealExplanation) {
               $("bv-quiz-explain").textContent = quiz.explanation;
               $("bv-quiz-explain").classList.remove("hidden");
-              $("bv-quiz-next").classList.remove("hidden");
-              $("bv-quiz-next").onclick = finish;
-            } else {
-              // 解説は後で(トシ案)。少し見せてから次へ。
-              $("bv-quiz-next").classList.remove("hidden");
-              $("bv-quiz-next").onclick = finish;
             }
+            $("bv-quiz-next").classList.remove("hidden");
+            $("bv-quiz-next").onclick = finish;
           });
           wrap.appendChild(btn);
         });
