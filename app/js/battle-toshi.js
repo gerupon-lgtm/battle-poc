@@ -1,13 +1,14 @@
 // =====================================================
 // battle-toshi.js  -- トシ案(改)
 // リズムモードをページ上部で選択できる:
-//   - "attack" 攻撃型(既定): クイズ正解=敵に直接ダメージ(元ターン制ロジック)。
+//   - "attack" 攻撃型(既定): クイズ正解=敵に直接ダメージ。
 //              リズムクリア=敵にダメージ / 時間切れ=自分にダメージ。
-//   - "defense" 防御専用    : クイズ正解=敵に直接ダメージ(元ターン制ロジック)。
+//   - "defense" 防御専用    : クイズ正解=敵に直接ダメージ。
 //              リズムは自分の被ダメージのみに関与(獲得点数で軽減)。
-// クイズ正解時のダメージは、元の index.html / battle.js が持っていた
-//   computeDamage = max(1, 攻撃力 - 相手守備力)  (オプションで±20%乱数)
-// をそのまま流用する。守備半減ロジックは廃止(HP が本当に 0 にならない問題のため)。
+//
+// クイズ正解時の敵ダメージは BattleCore.rollDamage を使用:
+//   通常 = 敵の元最大HP × 30% ± 乱数(負数含む)
+//   かいしんのいちげき = 極低確率で 元最大HP × 70〜90% の大ダメージ
 // 解説は勝利後にまとめて表示。どちらかの HP が 0 になるまで繰り返す。
 // =====================================================
 (function () {
@@ -15,38 +16,33 @@
     PLAYER_HP: 100,
     QUIZ_CHOICES: 2, // 1/2(/3)の選択式。2 または 3。
 
-    // --- 元ターン制バトルの攻撃ロジック(battle.js / config.js より) ---
-    QUIZ_ATTACK_POWER: 15, // 元 CONFIG.PLAYER_ATTACK。クイズ正解時の攻撃力。
-    BATTLE_USE_RANDOM: false, // true で ±RANGE の乱数(元の挙動)
-    BATTLE_RANDOM_RANGE: 0.2,
+    // クイズ正解時の敵ダメージ(BattleCore.rollDamage と共通仕様)
+    DAMAGE: {
+      baseRatio: 0.30,
+      randomRange: 8,
+      min: 1,
+      critChance: 0.02, // かいしんのいちげき(極低確率・将来パラメータ化)
+      critMinRatio: 0.70,
+      critMaxRatio: 0.90,
+    },
 
     // --- 攻撃型(attack) リズム攻撃 ---
-    RHYTHM_ATTACK_POWER: 20, // リズムクリア時の攻撃力
-    SCORE_BONUS_DIVISOR: 1200, // リズムスコア → 追加ダメージ
+    RHYTHM_ATTACK_POWER: 20,
+    SCORE_BONUS_DIVISOR: 1200,
     TIMEOUT_USES_ENEMY_ATTACK: true,
     TIMEOUT_FIXED_DAMAGE: 14,
 
     // --- 防御専用(defense) 被ダメージ軽減 ---
-    DEFENSE_MITIGATION_DIVISOR: 800, // score / 値 = 軽減点
-    DEFENSE_CLEAR_BONUS: 6, // 防御クリア時の追加軽減
+    DEFENSE_MITIGATION_DIVISOR: 800,
+    DEFENSE_CLEAR_BONUS: 6,
   };
-
-  // 元 battle.js の computeDamage をそのまま流用
-  function computeDamage(attack, defense) {
-    let base = Math.max(1, attack - defense);
-    if (CONFIG.BATTLE_USE_RANDOM) {
-      const r = 1 + (Math.random() * 2 - 1) * CONFIG.BATTLE_RANDOM_RANGE;
-      base = Math.max(1, Math.round(base * r));
-    }
-    return base;
-  }
 
   // mode: "attack" | "defense"
   async function run(core, opts) {
     opts = opts || {};
     const mode = opts.mode === "defense" ? "defense" : "attack";
     const enemy = core.state.enemy;
-    const learned = []; // 勝利後にまとめて表示する解説
+    const learned = [];
 
     core.log(
       "リズムモード: " + (mode === "defense" ? "防御専用(被ダメージ軽減)" : "攻撃型"),
@@ -54,19 +50,19 @@
     );
 
     while (!core.isOver()) {
-      // 1. クイズ: 正解で敵に直接ダメージ(元ターン制ロジック)
+      // 1. クイズ: 正解で敵に直接ダメージ(30%基準±乱数 + 会心)
       const quiz = window.QuizEngine.next(CONFIG.QUIZ_CHOICES);
       const ans = await core.showQuiz(quiz, { revealExplanation: false });
       learned.push(quiz);
 
       if (ans.correct) {
-        const dmg = computeDamage(CONFIG.QUIZ_ATTACK_POWER, enemy.defense);
-        core.damageEnemy(dmg);
-        core.log(
-          "正解! " + enemy.name + "に " + dmg + " ダメージ" +
-            "(攻撃" + CONFIG.QUIZ_ATTACK_POWER + " - 守備" + enemy.defense + ")",
-          "good"
-        );
+        const r = window.BattleCore.rollDamage(core.state.enemyMaxHp, CONFIG.DAMAGE);
+        core.damageEnemy(r.damage);
+        if (r.crit) {
+          core.log("かいしんのいちげき! " + enemy.name + "に " + r.damage + " の大ダメージ!", "crit");
+        } else {
+          core.log("正解! " + enemy.name + "に " + r.damage + " ダメージ", "good");
+        }
       } else {
         core.log("不正解... 攻撃のチャンスを逃した", "bad");
       }
@@ -95,7 +91,6 @@
           core.log("時間切れ... 自分に " + dmg + " ダメージ", "bad");
         }
       } else {
-        // 防御専用: リズムは自分の被ダメージのみに関与(スコアで軽減)
         const rr = await core.runRhythmRound(
           "防御フェーズ(防御専用): ［戦闘開始］を押してリズム。スコアが高いほど被ダメージを軽減"
         );

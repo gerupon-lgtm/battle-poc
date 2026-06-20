@@ -165,11 +165,27 @@ body {
   }
   /* 流用元の余計な縦要素は隠す(独自ログ・敵ゲージ・曲選択) */
   body[data-stage="rhythm"] .bv-rhythm-embed .log-card,
-  body[data-stage="rhythm"] .bv-rhythm-embed .enemy-area,
-  body[data-stage="rhythm"] .bv-rhythm-embed .calibration-btn { display: none !important; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .enemy-area { display: none !important; }
 
-  body[data-stage="rhythm"] .bv-rhythm-embed .hero-panel { flex: 0 0 auto; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .hero-panel {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
   body[data-stage="rhythm"] .bv-rhythm-embed .start-controls { margin: 0; }
+  /* キャリブレーション: サイズを崩さず開始ボタンの隣にコンパクト表示 */
+  body[data-stage="rhythm"] .bv-rhythm-embed .calibration-btn {
+    display: inline-flex !important;
+    align-items: center;
+    width: auto;
+    margin: 0;
+    padding: 6px 12px;
+    min-height: 32px;
+    font-size: 12px;
+  }
   body[data-stage="rhythm"] .bv-rhythm-embed .battle-card {
     flex: 1;
     min-height: 0;
@@ -198,3 +214,6 @@ body {
   /* 「次へ」は常に最下部に固定的に見える(flexの最後) */
   body[data-stage="rhythm"] #bv-rhythm-next { flex: 0 0 auto; margin: 0; min-height: 40px; }
 }
+
+/* かいしんのいちげき(クリティカル)のログ強調 */
+.bv-log-line.crit { color: #ffd166; font-weight: 800; text-shadow: 0 0 8px rgba(255,209,102,.5); }

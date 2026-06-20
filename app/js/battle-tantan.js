@@ -1,11 +1,11 @@
 // =====================================================
 // battle-tantan.js  -- たんたん案
 // 流れ:
-//   1. リズムゲームを行う。獲得点数によって選択肢数が絞られる。
-//   2. クイズ表示。正解=敵にダメージ / 不正解=自分にダメージ。
+//   1. リズムゲーム(曲ランダム)を行う。獲得点数によって選択肢数が絞られる。
+//   2. クイズ表示。正解=敵にダメージ(30%基準±乱数 + かいしんのいちげき) /
+//      不正解=自分にダメージ。
 //   3. 解説は問題ごとに表示。
 //   4. どちらかの HP が 0 になるまで繰り返す。
-// 調整パラメータは CONFIG にまとめてある。
 // =====================================================
 (function () {
   const CONFIG = {
@@ -13,13 +13,18 @@
     // リズムスコア → 選択肢数(高スコアほど少ない=易しい)
     SCORE_FOR_2_CHOICES: 4800,
     SCORE_FOR_3_CHOICES: 2400,
-    // 正解時に敵へ与える基礎ダメージ
-    CORRECT_BASE_DAMAGE: 14,
-    // リズムを撃破(クリア)していた場合の追加ダメージ
-    CLEAR_BONUS_DAMAGE: 8,
     // 不正解時に自分が受けるダメージ(敵の攻撃力を使用)
     WRONG_USES_ENEMY_ATTACK: true,
     WRONG_FIXED_DAMAGE: 12,
+    // 敵へのダメージ(BattleCore.rollDamage と共通仕様)
+    DAMAGE: {
+      baseRatio: 0.30, // 敵の元最大HPの30%を基準
+      randomRange: 8, // ±8の一様乱数(負数含む)
+      min: 1, // 下限
+      critChance: 0.02, // かいしんのいちげき発生率(極低確率・将来パラメータ化)
+      critMinRatio: 0.70, // 会心時ダメージ: 元最大HPの70%〜
+      critMaxRatio: 0.90, // 〜90%
+    },
   };
 
   function choicesFromScore(score) {
@@ -29,8 +34,9 @@
   }
 
   async function run(core) {
+    const enemy = core.state.enemy;
     while (!core.isOver()) {
-      // 1. リズムラウンド
+      // 1. リズムラウンド(曲ランダム)
       const rr = await core.runRhythmRound(
         "リズムラウンド: ［戦闘開始］を押して演奏。スコアで選択肢数が決まります"
       );
@@ -47,13 +53,15 @@
 
       // 3. ダメージ処理
       if (ans.correct) {
-        let dmg = CONFIG.CORRECT_BASE_DAMAGE + (rr.cleared ? CONFIG.CLEAR_BONUS_DAMAGE : 0);
-        core.damageEnemy(dmg);
-        core.log("正解! " + core.state.enemy.name + "に " + dmg + " ダメージ", "good");
+        const r = window.BattleCore.rollDamage(core.state.enemyMaxHp, CONFIG.DAMAGE);
+        core.damageEnemy(r.damage);
+        if (r.crit) {
+          core.log("かいしんのいちげき! " + enemy.name + "に " + r.damage + " の大ダメージ!", "crit");
+        } else {
+          core.log("正解! " + enemy.name + "に " + r.damage + " ダメージ", "good");
+        }
       } else {
-        const dmg = CONFIG.WRONG_USES_ENEMY_ATTACK
-          ? core.state.enemy.attack
-          : CONFIG.WRONG_FIXED_DAMAGE;
+        const dmg = CONFIG.WRONG_USES_ENEMY_ATTACK ? enemy.attack : CONFIG.WRONG_FIXED_DAMAGE;
         core.damagePlayer(dmg);
         core.log("不正解... 自分に " + dmg + " ダメージ", "bad");
       }

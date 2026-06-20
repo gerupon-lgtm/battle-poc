@@ -4,7 +4,8 @@
 //   - プレイヤー/敵 HP の管理と描画
 //   - コメント欄(ダメージ等)へのログ出力
 //   - クイズパネルの描画と回答待ち
-//   - リズムラウンドの実行(rhythm-battle-poc.js を流用)
+//   - リズムラウンドの実行(rhythm-battle-poc.js を流用、曲はランダム選択)
+//   - 敵ダメージの共通計算(30%基準±乱数 + かいしんのいちげき)
 // リズム部分のラウンド終了は window.RhythmBridge.onRoundEnd 経由で受け取る。
 // =====================================================
 (function () {
@@ -12,6 +13,36 @@
 
   function clamp(v, lo, hi) {
     return Math.max(lo, Math.min(hi, v));
+  }
+
+  // 敵へのダメージ計算(共通)。
+  //   通常: base = 敵の元最大HP × baseRatio に ±randomRange の乱数(負数含む)を加算。
+  //   かいしんのいちげき: critChance の確率で、元最大HP × [critMinRatio, critMaxRatio] の大ダメージ。
+  // 戻り値: { damage:Number, crit:Boolean }
+  function rollDamage(maxHp, cfg) {
+    cfg = cfg || {};
+    const min = cfg.min != null ? cfg.min : 1;
+    const critChance = cfg.critChance || 0;
+    if (Math.random() < critChance) {
+      const lo = cfg.critMinRatio != null ? cfg.critMinRatio : 0.7;
+      const hi = cfg.critMaxRatio != null ? cfg.critMaxRatio : 0.9;
+      const ratio = lo + Math.random() * (hi - lo);
+      return { damage: Math.max(min, Math.round(maxHp * ratio)), crit: true };
+    }
+    const base = maxHp * (cfg.baseRatio != null ? cfg.baseRatio : 0.3);
+    const rnd = (Math.random() * 2 - 1) * (cfg.randomRange || 0);
+    return { damage: Math.max(min, Math.round(base + rnd)), crit: false };
+  }
+
+  // リズムの曲をランダムに選ぶ(song-select の value を書き換える)
+  function pickRandomSong() {
+    const sel = $("song-select");
+    if (sel && sel.options && sel.options.length) {
+      const i = Math.floor(Math.random() * sel.options.length);
+      sel.value = sel.options[i].value;
+      return sel.options[i].textContent || sel.value;
+    }
+    return null;
   }
 
   function create(opts) {
@@ -83,25 +114,25 @@
     }
 
     // リズムラウンドを1回実行する。
-    // ユーザーがリズムパネル内の[戦闘開始]を押すと開始し、撃破 or 時間切れで
-    // 結果(撃破！/時間切れ)を表示する。結果は表示したまま保持し、ユーザーが
-    // ［次へ］を押してから {score, combo, cleared} を解決する(=次のターンへ進む)。
-    // 二回目以降は開始前に前ターンの結果表示をクリアする。
+    // 開始前に曲をランダム選択し、ユーザーが[戦闘開始]を押すと開始する。
+    // 撃破 or 時間切れで結果を表示し、［次へ］を押してから
+    // {score, combo, cleared} を解決する(=次のターンへ進む)。
     function runRhythmRound(prompt) {
       return new Promise((resolve) => {
         showStage("rhythm");
         clearRhythmResult();
+        const songName = pickRandomSong(); // 曲をランダムに
         const startBtn = $("start-btn");
         if (startBtn) startBtn.disabled = false;
+        const base = prompt || "下の［戦闘開始］を押してリズムを開始してください";
         $("bv-rhythm-prompt").textContent =
-          prompt || "下の［戦闘開始］を押してリズムを開始してください";
+          base + (songName ? "（曲: " + songName + "）" : "");
         let done = false;
         window.RhythmBridge = {
           onRoundEnd: (r) => {
             if (done) return;
             done = true;
             window.RhythmBridge.onRoundEnd = null;
-            // 結果(撃破！/時間切れ)は表示したまま、確認を待つ
             if (startBtn) startBtn.disabled = true; // 再演奏を防止
             $("bv-rhythm-prompt").textContent =
               "リズム結果を確認して［次へ］を押してください";
@@ -182,5 +213,5 @@
     };
   }
 
-  window.BattleCore = { create };
+  window.BattleCore = { create, rollDamage };
 })();
