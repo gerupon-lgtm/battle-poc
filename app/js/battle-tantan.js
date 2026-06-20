@@ -40,12 +40,15 @@
   async function run(core) {
     const enemy = core.state.enemy;
     const learned = []; // バトル後にまとめて表示する解説
+    const patSeq = window.BattleCore.createPatternSequencer();
 
     while (!core.isOver()) {
-      // 1. リズムラウンド(曲・パターンともランダム)
+      // 1. リズムラウンド(曲はランダム / パターンは順送り。時間切れは同パターン再戦)
       const rr = await core.runRhythmRound(
-        "リズムラウンド: ［戦闘開始］を押して演奏。スコアで選択肢数が決まります"
+        "リズムラウンド: ［戦闘開始］を押して演奏。スコアで選択肢数が決まります",
+        patSeq.next()
       );
+      patSeq.update(rr.cleared);
       const choiceCount = choicesFromScore(rr.score);
       core.log(
         "リズム結果 スコア" + rr.score + " / " + rr.combo + "コンボ" +

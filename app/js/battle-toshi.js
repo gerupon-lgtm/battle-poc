@@ -43,6 +43,7 @@
     const mode = opts.mode === "defense" ? "defense" : "attack";
     const enemy = core.state.enemy;
     const learned = [];
+    const patSeq = window.BattleCore.createPatternSequencer();
 
     core.log(
       "リズムモード: " + (mode === "defense" ? "防御専用(被ダメージ軽減)" : "攻撃型"),
@@ -71,8 +72,10 @@
       // 2. リズム
       if (mode === "attack") {
         const rr = await core.runRhythmRound(
-          "防御フェーズ: ［戦闘開始］を押してリズム。クリアで攻撃、時間切れで被弾"
+          "防御フェーズ: ［戦闘開始］を押してリズム。クリアで攻撃、時間切れで被弾",
+          patSeq.next()
         );
+        patSeq.update(rr.cleared);
         if (rr.cleared) {
           const bonus = Math.floor(rr.score / CONFIG.SCORE_BONUS_DIVISOR);
           const dmg = Math.max(1, CONFIG.RHYTHM_ATTACK_POWER + bonus - enemy.defense);
@@ -92,8 +95,10 @@
         }
       } else {
         const rr = await core.runRhythmRound(
-          "防御フェーズ(防御専用): ［戦闘開始］を押してリズム。スコアが高いほど被ダメージを軽減"
+          "防御フェーズ(防御専用): ［戦闘開始］を押してリズム。スコアが高いほど被ダメージを軽減",
+          patSeq.next()
         );
+        patSeq.update(rr.cleared);
         const base = enemy.attack;
         let mitigation = Math.floor(rr.score / CONFIG.DEFENSE_MITIGATION_DIVISOR);
         if (rr.cleared) mitigation += CONFIG.DEFENSE_CLEAR_BONUS;

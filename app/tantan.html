@@ -167,8 +167,8 @@
   <script src="./js/rhythm-battle-poc.js?v=27"></script>
   <script src="./js/enemy-loader.js?v=2"></script>
   <script src="./js/quiz-engine.js?v=1"></script>
-  <script src="./js/battle-core.js?v=7"></script>
-  <script src="./js/battle-tantan.js?v=7"></script>
+  <script src="./js/battle-core.js?v=8"></script>
+  <script src="./js/battle-tantan.js?v=8"></script>
   <script>
     (async function () {
       const FLOW = window.BattleTantan;
@@ -185,8 +185,8 @@
       enemy = EnemyLoader.random();
       core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
       document.getElementById("bv-start").addEventListener("click", function () {
-        // 対戦ごとに敵をランダム抽選
-        enemy = EnemyLoader.random();
+        // 表示中(イントロでプレビュー)の敵でそのまま開始。
+        // 新しい敵は「もう一度」(リロード)で抽選される。
         core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
         FLOW.run(core);
       });
