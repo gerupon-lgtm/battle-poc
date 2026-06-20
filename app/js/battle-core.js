@@ -67,6 +67,8 @@
       ["bv-quiz", "bv-rhythm", "bv-intro", "bv-finish"].forEach((id) => {
         $(id).classList.toggle("hidden", id !== "bv-" + which);
       });
+      // モバイルのレイアウト切替用(リズム時に一画面へ収める)
+      if (document.body) document.body.setAttribute("data-stage", which);
     }
 
     // 前ターンのリズム結果表示を消す

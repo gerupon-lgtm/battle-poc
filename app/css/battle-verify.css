@@ -113,3 +113,88 @@ body {
 .bv-mode-opt input { margin-top: 3px; }
 .bv-mode-opt strong { color: var(--bv-text); }
 #bv-rhythm-next { margin-top: 14px; }
+
+/* =====================================================
+   モバイル: リズム画面を一画面に収める
+   data-stage="rhythm" のとき .bv-app を 100dvh のflex列にし、
+   レーンが残り高さを吸収する。ヘッダーは圧縮、二次要素は非表示。
+   ===================================================== */
+@media (max-width: 560px) {
+  /* 通常時のヘッダー圧縮(全ステージ共通) */
+  .bv-app { padding: 10px; }
+  .bv-enemy-img { width: 56px; height: 56px; }
+
+  body[data-stage="rhythm"] { overflow: hidden; }
+  body[data-stage="rhythm"] .bv-app {
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+    gap: 6px;
+  }
+  /* リズム中は補助要素を隠してレーンに高さを回す */
+  body[data-stage="rhythm"] .bv-title,
+  body[data-stage="rhythm"] .bv-nav,
+  body[data-stage="rhythm"] .bv-log-card { display: none !important; }
+
+  /* ヘッダーをさらにコンパクトに */
+  body[data-stage="rhythm"] .bv-header { padding: 8px 10px; margin: 0; }
+  body[data-stage="rhythm"] .bv-enemy-row { gap: 8px; margin-bottom: 4px; }
+  body[data-stage="rhythm"] .bv-enemy-img { width: 40px; height: 40px; }
+  body[data-stage="rhythm"] .bv-enemy-name { font-size: 13px; margin-bottom: 2px; }
+  body[data-stage="rhythm"] .bv-hp-row { margin: 2px 0; }
+
+  /* リズム本体を可変領域に */
+  body[data-stage="rhythm"] #bv-rhythm {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    margin: 0;
+    padding: 8px;
+    gap: 4px;
+  }
+  body[data-stage="rhythm"] .bv-rhythm-prompt { font-size: 11px; margin: 0; }
+  body[data-stage="rhythm"] .bv-rhythm-embed {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  /* 流用元の余計な縦要素は隠す(独自ログ・敵ゲージ・曲選択) */
+  body[data-stage="rhythm"] .bv-rhythm-embed .log-card,
+  body[data-stage="rhythm"] .bv-rhythm-embed .enemy-area,
+  body[data-stage="rhythm"] .bv-rhythm-embed .calibration-btn { display: none !important; }
+
+  body[data-stage="rhythm"] .bv-rhythm-embed .hero-panel { flex: 0 0 auto; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .start-controls { margin: 0; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .battle-card {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 8px;
+  }
+  /* レーン: 残り高さを吸収(縦サイズを必要に応じて縮小) */
+  body[data-stage="rhythm"] .bv-rhythm-embed .lane {
+    flex: 1;
+    min-height: 130px;
+    height: auto !important;
+  }
+  body[data-stage="rhythm"] .bv-rhythm-embed .attack-btn { flex: 0 0 auto; min-height: 40px; margin: 0; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .judge { flex: 0 0 auto; min-height: 1.1rem; margin: 0; }
+  /* メーター(スコア/コンボ)は残すが薄く */
+  body[data-stage="rhythm"] .bv-rhythm-embed .meter-card {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 4px 8px;
+  }
+  body[data-stage="rhythm"] .bv-rhythm-embed .meter-card div { font-size: 10px; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .meter-card strong { font-size: 13px; }
+  /* 「次へ」は常に最下部に固定的に見える(flexの最後) */
+  body[data-stage="rhythm"] #bv-rhythm-next { flex: 0 0 auto; margin: 0; min-height: 40px; }
+}
