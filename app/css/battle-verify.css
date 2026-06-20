@@ -1,0 +1,107 @@
+/* =====================================================
+   battle-verify.css
+   バトル検証レイヤーのスタイル(検証専用・自己完結)。
+   rhythm-battle-poc.css と併用する。
+   ===================================================== */
+:root {
+  --bv-bg: #10131c;
+  --bv-panel: #1b2030;
+  --bv-panel2: #232a3d;
+  --bv-text: #eef1f8;
+  --bv-muted: #9aa3bd;
+  --bv-accent: #6ea8ff;
+  --bv-enemy: #ff6b6b;
+  --bv-player: #4cd28a;
+  --bv-good: #4cd28a;
+  --bv-bad: #ff6b6b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  background: var(--bv-bg);
+  color: var(--bv-text);
+}
+.bv-app { max-width: 720px; margin: 0 auto; padding: 16px; }
+.bv-title { font-size: 18px; margin: 4px 0 12px; }
+.bv-title .badge {
+  font-size: 11px; background: var(--bv-accent); color: #06122b;
+  border-radius: 6px; padding: 2px 6px; margin-left: 6px; vertical-align: middle;
+}
+.bv-nav { font-size: 12px; color: var(--bv-muted); margin-bottom: 12px; }
+.bv-nav a { color: var(--bv-accent); }
+
+/* --- ヘッダー(敵・自分の HP) --- */
+.bv-header { background: var(--bv-panel); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+.bv-enemy-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.bv-enemy-img { width: 76px; height: 76px; object-fit: contain; image-rendering: auto; }
+.bv-enemy-name { font-weight: 700; font-size: 16px; margin: 0 0 4px; }
+.bv-hp-block { flex: 1; }
+.bv-hp-row { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 4px 0; }
+.bv-hp-row .lbl { width: 36px; color: var(--bv-muted); }
+.bv-hp-bg { flex: 1; height: 12px; background: #0c0f18; border-radius: 6px; overflow: hidden; }
+.bv-hp-fill { height: 100%; transition: width .35s ease; }
+.bv-hp-fill.enemy { background: linear-gradient(90deg, #ff9a6b, var(--bv-enemy)); }
+.bv-hp-fill.player { background: linear-gradient(90deg, #6bffba, var(--bv-player)); }
+.bv-hp-num { width: 70px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* --- ステージ共通 --- */
+.bv-stage { background: var(--bv-panel); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+.hidden { display: none !important; }
+
+/* --- イントロ --- */
+#bv-intro p { color: var(--bv-muted); line-height: 1.7; }
+.bv-btn {
+  appearance: none; border: 0; border-radius: 10px; cursor: pointer;
+  font-weight: 700; padding: 12px 20px; font-size: 15px;
+  background: var(--bv-accent); color: #06122b;
+}
+.bv-btn.sub { background: var(--bv-panel2); color: var(--bv-text); }
+.bv-btn:disabled { opacity: .5; cursor: default; }
+
+/* --- クイズ --- */
+.bv-quiz-category { font-size: 12px; color: var(--bv-accent); margin: 0 0 6px; }
+.bv-quiz-q { font-size: 18px; line-height: 1.6; white-space: pre-line; margin: 0 0 16px; }
+.bv-choices { display: grid; gap: 10px; }
+.bv-choice {
+  text-align: left; padding: 13px 14px; border-radius: 10px; cursor: pointer;
+  border: 1px solid #38415c; background: var(--bv-panel2); color: var(--bv-text);
+  font-size: 15px;
+}
+.bv-choice:hover:not(:disabled) { border-color: var(--bv-accent); }
+.bv-choice.correct { background: rgba(76,210,138,.2); border-color: var(--bv-good); }
+.bv-choice.wrong { background: rgba(255,107,107,.2); border-color: var(--bv-bad); }
+.bv-explain {
+  margin-top: 14px; padding: 12px 14px; border-radius: 10px;
+  background: #141a28; color: #cdd5ec; font-size: 13px; line-height: 1.8;
+}
+#bv-quiz-next { margin-top: 14px; }
+
+/* --- リズム埋め込み --- */
+.bv-rhythm-prompt { color: var(--bv-muted); font-size: 13px; margin: 0 0 10px; }
+/* 既定曲を使うため選択系UIは隠す(DOMは残す) */
+.bv-rhythm-embed .hero-copy,
+.bv-rhythm-embed .poc-select-control,
+.bv-rhythm-embed .bpm-control,
+.bv-rhythm-embed .hint-control,
+.bv-rhythm-embed .haptic-control { display: none !important; }
+.bv-rhythm-embed .hero-panel { padding: 0; background: transparent; box-shadow: none; }
+.bv-rhythm-embed .start-controls { justify-content: center; }
+
+/* --- 決着 --- */
+.bv-finish-title { font-size: 26px; margin: 4px 0 12px; }
+.bv-finish-title.win { color: var(--bv-good); }
+.bv-finish-title.lose { color: var(--bv-bad); }
+.bv-finish-lead { color: var(--bv-accent); font-weight: 700; margin: 8px 0; }
+.bv-explain-item { background: #141a28; border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+.bv-explain-item strong { display: block; margin-bottom: 6px; font-size: 13px; }
+.bv-explain-item p { margin: 0; font-size: 12px; line-height: 1.8; color: #cdd5ec; }
+
+/* --- コメント欄 --- */
+.bv-log-card { background: var(--bv-panel); border-radius: 12px; padding: 12px 14px; }
+.bv-log-card h2 { font-size: 13px; margin: 0 0 8px; color: var(--bv-muted); }
+#bv-log { max-height: 180px; overflow-y: auto; font-size: 13px; }
+.bv-log-line { padding: 4px 0; border-bottom: 1px solid #232a3d; }
+.bv-log-line.good { color: var(--bv-good); }
+.bv-log-line.bad { color: var(--bv-bad); }
+.bv-log-line.info { color: var(--bv-muted); }

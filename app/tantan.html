@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>リズム→クイズ式バトル</title>
+  <link rel="stylesheet" href="./css/rhythm-battle-poc.css?v=16">
+  <link rel="stylesheet" href="./css/battle-verify.css?v=1">
+</head>
+<body>
+<div class="bv-app">
+  <h1 class="bv-title">リズム→クイズ式バトル<span class="badge">たんたん案</span></h1>
+  <p class="bv-nav"><a href="./index.html">← 方式選択へ戻る</a> ／ 敵: そらドラゴン(固定)</p>
+
+  <header class="bv-header">
+    <div class="bv-enemy-row">
+      <img id="bv-enemy-img" class="bv-enemy-img" alt="" />
+      <div class="bv-hp-block">
+        <p class="bv-enemy-name" id="bv-enemy-name">-</p>
+        <div class="bv-hp-row">
+          <span class="lbl">敵</span>
+          <div class="bv-hp-bg"><div id="bv-enemy-hp-bar" class="bv-hp-fill enemy"></div></div>
+          <span class="bv-hp-num"><span id="bv-enemy-hp">-</span>/<span id="bv-enemy-hp-max">-</span></span>
+        </div>
+        <div class="bv-hp-row">
+          <span class="lbl">自分</span>
+          <div class="bv-hp-bg"><div id="bv-player-hp-bar" class="bv-hp-fill player"></div></div>
+          <span class="bv-hp-num"><span id="bv-player-hp">-</span>/<span id="bv-player-hp-max">-</span></span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <section id="bv-intro" class="bv-stage">
+    <p>リズムゲームのスコアでクイズの選択肢数が決まります。正解で敵に、不正解で自分にダメージ。解説は毎問表示。どちらかのHPが0になるまで繰り返します。</p>
+    
+    <button id="bv-start" class="bv-btn">戦闘開始</button>
+  </section>
+
+  <section id="bv-quiz" class="bv-stage hidden">
+    <p class="bv-quiz-category" id="bv-quiz-category"></p>
+    <p class="bv-quiz-q" id="bv-quiz-q"></p>
+    <div class="bv-choices" id="bv-quiz-choices"></div>
+    <div class="bv-explain hidden" id="bv-quiz-explain"></div>
+    <button id="bv-quiz-next" class="bv-btn hidden">次へ</button>
+  </section>
+
+  <section id="bv-rhythm" class="bv-stage hidden">
+    <p class="bv-rhythm-prompt" id="bv-rhythm-prompt"></p>
+    <div class="bv-rhythm-embed">
+<section class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">Web Audio API PoC</p>
+        <h1>リズム戦闘</h1>
+        <p class="lead">BGMの拍に合わせて攻撃。判定ラインにノーツが重なる瞬間をタップしてください。</p>
+      </div>
+      <div class="start-controls">
+        <label class="poc-select-control" for="song-select">
+          <span>曲</span>
+          <select id="song-select">
+            <option value="straight">ストレート・バトル</option>
+            <option value="syncopated">シンコペーション・ドライブ</option>
+            <option value="shuffle">シャッフル・クエスト</option>
+            <option value="minimal">余白のステップ</option>
+            <option value="jazz">ミッドナイト・ブレイク（JAZZ）</option>
+          </select>
+        </label>
+        <label class="poc-select-control" for="pattern-select">
+          <span>タップ</span>
+          <select id="pattern-select">
+            <option value="basic">基本</option>
+            <option value="offbeat">裏拍</option>
+            <option value="technical">技巧</option>
+            <option value="sparse">余白</option>
+            <option value="jazzBreak">ブレイク技巧</option>
+          </select>
+        </label>
+        <label class="bpm-control" for="bpm-input">
+          <span>BPM</span>
+          <input id="bpm-input" type="number" min="80" max="180" step="1" inputmode="numeric" value="126">
+        </label>
+        <label class="hint-control" for="hint-toggle">
+          <span>ヒント</span>
+          <input id="hint-toggle" type="checkbox" checked>
+        </label>
+        <label class="haptic-control" for="haptic-toggle">
+          <span id="haptic-label">振動</span>
+          <input id="haptic-toggle" type="checkbox" checked>
+        </label>
+        <button id="start-btn" class="start-btn">戦闘開始</button>
+      </div>
+      <button id="calibration-btn" class="calibration-btn" type="button">タイミング調整</button>
+    </section>
+
+    <section class="battle-card">
+      <div class="enemy-area">
+        <div class="enemy-sprite" aria-hidden="true">
+          <span class="enemy-face">◆</span>
+        </div>
+        <div class="enemy-info">
+          <p class="enemy-name">ビートスライム</p>
+          <div class="hp-line">
+            <span>HP</span>
+            <div class="hp-bar"><div id="enemy-hp-fill"></div></div>
+            <strong id="enemy-hp">420</strong>
+          </div>
+        </div>
+      </div>
+
+      <div id="lane" class="lane" aria-label="リズムレーン">
+        <div class="lane-grid"></div>
+        <div class="phase-labels" aria-hidden="true">
+          <span>表</span>
+          <span>裏</span>
+        </div>
+        <pre id="diagnostics-panel" class="diagnostics-panel" hidden aria-live="off"></pre>
+        <div class="hit-line"><span class="hit-line-flash"></span></div>
+        <div id="beat-guide" class="beat-guide" aria-hidden="true">
+          <span class="beat-guide-step"><span class="beat-guide-flash"></span></span>
+          <span class="beat-guide-step"><span class="beat-guide-flash"></span></span>
+          <span class="beat-guide-step"><span class="beat-guide-flash"></span></span>
+          <span class="beat-guide-step"><span class="beat-guide-flash"></span></span>
+        </div>
+        <div id="notes" class="notes"></div>
+        <div id="count-in" class="count-in" aria-live="assertive" hidden></div>
+        <div id="calibration-panel" class="calibration-panel" aria-live="assertive" hidden>
+          <strong>タイミング調整</strong>
+          <span id="calibration-status">音に合わせて「こうげき」をタップ</span>
+        </div>
+        <div id="battle-result" class="battle-result" aria-live="assertive" hidden>
+          <strong id="battle-result-title">撃破！</strong>
+          <span id="battle-result-detail"></span>
+        </div>
+      </div>
+
+      <button id="attack-btn" class="attack-btn">こうげき</button>
+      <p id="judge" class="judge">READY</p>
+    </section>
+
+    <section class="meter-card">
+      <div><span>BPM</span><strong id="bpm-label">126</strong></div>
+      <div><span>判定</span><strong>±80ms / ±180ms</strong></div>
+      <div><span>コンボ</span><strong id="combo">0</strong></div>
+      <div><span>スコア</span><strong id="score">0</strong></div>
+    </section>
+
+    <section class="log-card">
+      <h2>戦闘ログ</h2>
+      <div id="log" class="log"></div>
+    </section>
+    </div>
+  </section>
+
+  <section id="bv-finish" class="bv-stage hidden">
+    <h2 class="bv-finish-title" id="bv-finish-title"></h2>
+    <div id="bv-finish-detail"></div>
+    <button id="bv-restart" class="bv-btn sub">もう一度</button>
+  </section>
+
+  <div class="bv-log-card">
+    <h2>コメント</h2>
+    <div id="bv-log"></div>
+  </div>
+</div>
+
+  <script src="./js/rhythm-battle-poc.js?v=27"></script>
+  <script src="./js/enemy-loader.js?v=1"></script>
+  <script src="./js/quiz-engine.js?v=1"></script>
+  <script src="./js/battle-core.js?v=1"></script>
+  <script src="./js/battle-tantan.js?v=1"></script>
+  <script>
+    (async function () {
+      const FLOW = window.BattleTantan;
+      let enemy, core = null;
+      try {
+        enemy = await EnemyLoader.loadEnemy("enemy_008");
+        await QuizEngine.load();
+      } catch (e) {
+        document.getElementById("bv-intro").innerHTML =
+          '<p style="color:#ff6b6b">データ読込に失敗しました。ローカルサーバ経由で開いてください(README参照)。<br>' + e.message + '</p>';
+        return;
+      }
+      // イントロ用にヘッダーをプレビュー描画
+      core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
+      document.getElementById("bv-start").addEventListener("click", function () {
+        // 開始時に状態を作り直す
+        core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
+        FLOW.run(core);
+      });
+      document.getElementById("bv-restart").addEventListener("click", function () {
+        location.reload();
+      });
+    }());
+  </script>
+</body>
+</html>
