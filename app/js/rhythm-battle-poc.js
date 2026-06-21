@@ -9,6 +9,9 @@
     goodMs: 180,
     clearHpRatio: 0.7,
     calibrationVersion: 1,
+    // 判定線(バー)のフラッシュ: true=譜面のタップ時刻(note.time)に同期 / false=従来の4分音符ごと
+    // 従来挙動へ戻す場合は false、または URL に ?hitline=beats を付ける。
+    hitLineFlashByNotes: true,
   };
 
   const CALIBRATION_STORAGE_KEY = "rhythmBattleTimingCalibration";
@@ -214,6 +217,27 @@
       !Number.isFinite(audioStartSec)
     ) return 0;
     return performanceNowMs + (audioStartSec - audioNowSec) * 1000;
+  }
+
+  // 振動ズレ対策の初期化用: 読み取りギャップ(performance.now の前後差)が
+  // 最も小さい = 最もジャンクの無いサンプルを採用する。
+  function pickTightestSync(samples) {
+    if (!samples || !samples.length) return null;
+    return samples.reduce((best, s) => (s.gapMs < best.gapMs ? s : best), samples[0]);
+  }
+
+  // performance.now ↔ AudioContext.currentTime の対応を素早く複数回測り、
+  // 最も信頼できる1組を返す。演奏開始時に一度だけ呼んで壁時計アンカーを安定させる。
+  function measureAudioWallSync(audio, count) {
+    const n = count || 5;
+    const samples = [];
+    for (let i = 0; i < n; i += 1) {
+      const t0 = performance.now();
+      const a = audio.currentTime;
+      const t1 = performance.now();
+      samples.push({ perfMs: (t0 + t1) / 2, audioSec: a, gapMs: t1 - t0 });
+    }
+    return pickTightestSync(samples);
   }
 
   function calculateNoteAnimationDelayMs(
@@ -502,6 +526,7 @@
       isCompositorVisualMode,
       prefersCompositorVisuals,
       calculateVisualSongStartMs,
+      pickTightestSync,
       calculateNoteAnimationDelayMs,
       SONG_DEFINITIONS,
       CHART_DEFINITIONS,
@@ -1297,13 +1322,27 @@
     });
   }
 
+  function compositorTimelineNow() {
+    return document.timeline && Number.isFinite(document.timeline.currentTime)
+      ? document.timeline.currentTime
+      : performance.now();
+  }
+
+  // 判定線フラッシュのディスパッチャ。SETTINGS.hitLineFlashByNotes で挙動切替。
   function prepareCompositorHitLine(songStartMs) {
+    if (SETTINGS.hitLineFlashByNotes) {
+      prepareCompositorHitLineByNotes(songStartMs);
+    } else {
+      prepareCompositorHitLineByBeats(songStartMs);
+    }
+  }
+
+  // 【従来挙動】4分音符ごとに等間隔フラッシュ(復元用に保持)。
+  function prepareCompositorHitLineByBeats(songStartMs) {
     const flash = $("lane").querySelector(".hit-line-flash");
     const beatMs = beatSeconds(SETTINGS.bpm) * 1000;
     const pulseOffset = Math.min(0.5, 120 / beatMs);
-    const timelineNow = document.timeline && Number.isFinite(document.timeline.currentTime)
-      ? document.timeline.currentTime
-      : performance.now();
+    const timelineNow = compositorTimelineNow();
     const animation = flash.animate([
       { transform: "scaleX(1)", opacity: 1, offset: 0 },
       { transform: "scaleX(1)", opacity: 1, offset: pulseOffset * 0.45 },
@@ -1318,6 +1357,40 @@
     });
     animation.startTime = timelineNow;
     state.visualAnimations.push(animation);
+  }
+
+  // 【新挙動】タップすべきタイミング(譜面の各 note.time)に同期して単発フラッシュ。
+  // 各ノーツが判定線へ到達する壁時計 songStartMs + note.time*1000 を起点に短いパルス。
+  // 発光色は落下ノーツに合わせる: 頭=黄 / 裏=水色 / シャッフル裏=紫。
+  // アクセントは明るく(不透明度・発光を強調)。非フラッシュ時の地色は CSS の明るめグレー。
+  const HITLINE_FLASH_COLORS = {
+    head: { color: "#facc15", glow: "rgba(250, 204, 21, 0.95)" },
+    offbeat: { color: "#22d3ee", glow: "rgba(34, 211, 238, 0.95)" },
+    swing: { color: "#c084fc", glow: "rgba(192, 132, 252, 0.95)" },
+  };
+
+  function prepareCompositorHitLineByNotes(songStartMs) {
+    const flash = $("lane").querySelector(".hit-line-flash");
+    const beatMs = beatSeconds(SETTINGS.bpm) * 1000;
+    const flashMs = Math.max(90, Math.min(beatMs * 0.5, 180));
+    const timelineNow = compositorTimelineNow();
+    for (const note of state.chart) {
+      const arriveMs = songStartMs + note.time * 1000;
+      const c = HITLINE_FLASH_COLORS[note.phase] || HITLINE_FLASH_COLORS.head;
+      const peak = note.accent ? 1 : 0.85; // アクセントは明るく
+      const shadow = (note.accent ? "0 0 42px 12px " : "0 0 30px 7px ") + c.glow;
+      const animation = flash.animate([
+        { backgroundColor: c.color, boxShadow: shadow, opacity: peak, transform: "scaleX(1)", offset: 0 },
+        { backgroundColor: c.color, boxShadow: shadow, opacity: 0, transform: "scaleX(0.97)", offset: 1 },
+      ], {
+        duration: flashMs,
+        delay: arriveMs - timelineNow,
+        easing: "ease-out",
+        fill: "none",
+      });
+      animation.startTime = timelineNow;
+      state.visualAnimations.push(animation);
+    }
   }
 
   function finishSong() {
@@ -1366,6 +1439,7 @@
     $("count-in").hidden = true;
     $("battle-result").className = "battle-result";
     $("battle-result").hidden = true;
+    $("attack-btn").disabled = true; // 停止中は「こうげき」を非活性表示(演奏開始で解除)
     $("log").innerHTML = "";
     resetVisualBeatGuide();
     updateStats();
@@ -1557,11 +1631,15 @@
     $("start-btn").disabled = true;
     const countInStartTime = audio.currentTime + 0.2;
     state.startTime = calculateSongStartTime(countInStartTime, SETTINGS.bpm, 8);
-    state.visualSongStartMs = calculateVisualSongStartMs(
-      performance.now(),
-      audio.currentTime,
-      state.startTime
-    );
+    // 振動ズレ対策の初期化: 壁時計アンカーをジャンクの少ないサンプルで確定する。
+    // あわせて振動サブシステムをウォームアップ(初回発火の遅延を軽減)。
+    if (state.hapticEnabled) {
+      try { navigator.vibrate(0); } catch (_) { /* 任意機能。失敗してもプレイに影響させない */ }
+    }
+    const wallSync = measureAudioWallSync(audio, 5);
+    state.visualSongStartMs = wallSync
+      ? calculateVisualSongStartMs(wallSync.perfMs, wallSync.audioSec, state.startTime)
+      : calculateVisualSongStartMs(performance.now(), audio.currentTime, state.startTime);
     if (state.compositorVisuals) {
       prepareCompositorNotes(state.visualSongStartMs);
       prepareCompositorBeatGuide(state.visualSongStartMs);
@@ -1586,6 +1664,10 @@
 
   function bind() {
     state.debugEnabled = isDebugMode(window.location.search);
+    // 判定線フラッシュの挙動を URL で切替できる(?hitline=beats で従来挙動へ)
+    if (new URLSearchParams(window.location.search).get("hitline") === "beats") {
+      SETTINGS.hitLineFlashByNotes = false;
+    }
     state.compositorVisuals = prefersCompositorVisuals(window.location.search) &&
       typeof Element !== "undefined" &&
       typeof Element.prototype.animate === "function";

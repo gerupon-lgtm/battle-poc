@@ -220,3 +220,24 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
   body[data-stage="rhythm"] .bv-rhythm-embed .meter-card strong { font-size: 13px; }
   body[data-stage="rhythm"] #bv-rhythm-next { margin: 0; min-height: 40px; }
 }
+
+/* =====================================================
+   リズム背景に敵キャラを表示
+   レーン(#lane)最背面に敵画像。落下物(.notes)はキャラの上、
+   バー(.hit-line)・ゲージ(.beat-guide)は前面に重ねる。
+   ===================================================== */
+#bv-lane-enemy {
+  position: absolute;
+  inset: 0;
+  z-index: 1; /* レーン背景/グリッドより前、落下物より後ろ */
+  background-repeat: no-repeat;
+  background-position: center 44%;
+  background-size: min(58%, 200px) auto;
+  opacity: 0.5;
+  pointer-events: none;
+}
+.bv-rhythm-embed .lane .notes,
+.bv-rhythm-embed .lane .note-motion { z-index: 3; } /* 落下物=キャラの前 */
+.bv-rhythm-embed .lane .hit-line,
+.bv-rhythm-embed .lane .hit-line-flash { z-index: 5; } /* バー=前面 */
+/* ビートガイド(ゲージ)は元から z-index:6 で前面 */

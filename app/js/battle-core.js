@@ -70,6 +70,21 @@
   //   基本→裏拍→技巧→余白→ブレイク技巧 の順。クリアで次へ進み、
   //   時間切れ(未クリア)なら同じパターンで再戦。ブレイク技巧クリア後はランダム。
   const PATTERN_ORDER = ["basic", "offbeat", "technical", "sparse", "jazzBreak"];
+  // リズムのレーン(#lane)の最背面に敵キャラ画像を敷く。
+  // 落下物(.notes)はキャラの上、バー(.hit-line)・ゲージ(.beat-guide)は前面に重なる(CSSのz-index)。
+  function setLaneEnemyBackground(imageUrl) {
+    const lane = document.getElementById("lane");
+    if (!lane) return;
+    let bg = document.getElementById("bv-lane-enemy");
+    if (!bg) {
+      bg = document.createElement("div");
+      bg.id = "bv-lane-enemy";
+      bg.setAttribute("aria-hidden", "true");
+      lane.insertBefore(bg, lane.firstChild); // 最背面へ
+    }
+    bg.style.backgroundImage = imageUrl ? 'url("' + imageUrl + '")' : "none";
+  }
+
   function createPatternSequencer() {
     let idx = 0;
     let randomMode = false;
@@ -164,6 +179,7 @@
       return new Promise((resolve) => {
         showStage("rhythm");
         clearRhythmResult();
+        setLaneEnemyBackground(state.enemy.image); // 背景に敵キャラ
         const songName = pickRandomSong(); // 曲は常にランダム
         const patName = applyPattern(patternId); // パターンは指定 or ランダム
         const startBtn = $("start-btn");
