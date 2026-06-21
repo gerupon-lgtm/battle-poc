@@ -260,6 +260,7 @@
               const title = $("battle-result-title"); if (title) title.textContent = opts.turnLabel + "終了";
               const detail = $("battle-result-detail"); if (detail) detail.textContent = "";
               const res = $("battle-result"); if (res) { res.hidden = false; res.className = "battle-result"; }
+              const jd = $("judge"); if (jd) { jd.textContent = ""; jd.className = "judge"; } // 画面下の「時間切れ」を出さない
             }
             setLanePhase("");
             $("bv-rhythm-prompt").textContent =
@@ -424,6 +425,7 @@
             const title = $("battle-result-title"); if (title) title.textContent = "攻撃ターン終了";
             const detail = $("battle-result-detail"); if (detail) detail.textContent = "PERFECT " + tally.perfect + " / GOOD " + tally.good;
             const res = $("battle-result"); if (res) { res.hidden = false; res.className = "battle-result"; }
+            const jd = $("judge"); if (jd) { jd.textContent = ""; jd.className = "judge"; } // 画面下の「時間切れ」を出さない
             setLanePhase("");
             $("bv-rhythm-prompt").textContent = "攻撃ターン終了 ｜ ［次へ］を押してください";
             const next = $("bv-rhythm-next");
