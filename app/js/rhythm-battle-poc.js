@@ -932,7 +932,15 @@
     $("calibration-status").textContent = nearestIndex < 2
       ? "練習 " + (nearestIndex + 1) + " / 2"
       : "計測 " + state.calibrationSamples.length + " / 8";
-    if (state.calibrationSamples.length >= 8) finishCalibration();
+    if (state.calibrationSamples.length >= 8) {
+      // 8拍目は「8 / 8 完了!」を見せてから少し遅らせて完了処理へ。
+      // (同期で finishCalibration を呼ぶと 8/8 が描画される前に「調整完了」へ上書きされる)
+      // 併せてフォールバック完了タイマーも止め、確実に 8/8 を表示する。
+      clearCalibrationTimers();
+      state.calibrating = false;
+      $("calibration-status").textContent = "計測 8 / 8 完了!";
+      state.calibrationTimers.push(setTimeout(finishCalibration, 600));
+    }
   }
 
   async function startCalibration() {
