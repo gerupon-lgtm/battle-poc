@@ -12,6 +12,9 @@
     // 判定線(バー)のフラッシュ: true=譜面のタップ時刻(note.time)に同期 / false=従来の4分音符ごと
     // 従来挙動へ戻す場合は false、または URL に ?hitline=beats を付ける。
     hitLineFlashByNotes: true,
+    // 演奏中に「音声↔壁時計」の対応を測り直し、振動アンカーを音声へ追従させる(音とのズレ低減)。
+    // ?resync=off で無効化(従来=開始時アンカー固定)。
+    hapticResyncEnabled: true,
   };
 
   const CALIBRATION_STORAGE_KEY = "rhythmBattleTimingCalibration";
@@ -1191,6 +1194,14 @@
       state.debugLastSchedulerMs = schedulerNowMs;
     }
     const audio = state.audio;
+    // 定期リシンク(C): 振動アンカー visualSongStartMs を生の音声↔壁時計対応へ
+    // 緩やかに追従させ、曲を通して振動が音からずれないようにする(指数平滑で1読みのジッタを抑制)。
+    if (SETTINGS.hapticResyncEnabled && audio) {
+      const freshAnchorMs = performance.now() + (state.startTime - audio.currentTime) * 1000;
+      if (Number.isFinite(freshAnchorMs)) {
+        state.visualSongStartMs += (freshAnchorMs - state.visualSongStartMs) * 0.2;
+      }
+    }
     const beat = beatSeconds(SETTINGS.bpm);
     while (
       shouldScheduleBeat(state.nextBeat, SETTINGS.bars, 4) &&
@@ -1667,6 +1678,9 @@
     // 判定線フラッシュの挙動を URL で切替できる(?hitline=beats で従来挙動へ)
     if (new URLSearchParams(window.location.search).get("hitline") === "beats") {
       SETTINGS.hitLineFlashByNotes = false;
+    }
+    if (new URLSearchParams(window.location.search).get("resync") === "off") {
+      SETTINGS.hapticResyncEnabled = false;
     }
     state.compositorVisuals = prefersCompositorVisuals(window.location.search) &&
       typeof Element !== "undefined" &&

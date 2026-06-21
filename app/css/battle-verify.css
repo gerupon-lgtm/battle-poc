@@ -226,14 +226,16 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
    レーン(#lane)最背面に敵画像。落下物(.notes)はキャラの上、
    バー(.hit-line)・ゲージ(.beat-guide)は前面に重ねる。
    ===================================================== */
+/* グリッド(.lane-grid)はキャラの背面へ明示 */
+.bv-rhythm-embed .lane .lane-grid { z-index: 0; }
 #bv-lane-enemy {
   position: absolute;
   inset: 0;
-  z-index: 1; /* レーン背景/グリッドより前、落下物より後ろ */
+  z-index: 2; /* グリッド(0)より前=キャラを明確に表示。落下物(3)より後ろ */
   background-repeat: no-repeat;
-  background-position: center 44%;
-  background-size: min(58%, 200px) auto;
-  opacity: 0.5;
+  background-position: center 46%;
+  background-size: min(66%, 230px) auto;
+  opacity: 0.92; /* くっきり表示 */
   pointer-events: none;
 }
 .bv-rhythm-embed .lane .notes,
