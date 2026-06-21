@@ -15,6 +15,10 @@
     // 演奏中に「音声↔壁時計」の対応を測り直し、振動アンカーを音声へ追従させる(音とのズレ低減)。
     // ?resync=off で無効化(従来=開始時アンカー固定)。
     hapticResyncEnabled: true,
+    // 「戦闘開始」押下からカウント1拍目までの待ち(秒)。
+    // 開始直後は合成アニメ生成等で主スレッドが混むため、余裕を持たせて
+    // カウント拍と振動が詰まって発火する違和感を避ける。
+    startLeadSec: 0.5,
   };
 
   const CALIBRATION_STORAGE_KEY = "rhythmBattleTimingCalibration";
@@ -1640,7 +1644,7 @@
     state.countingIn = true;
     $("attack-btn").disabled = true;
     $("start-btn").disabled = true;
-    const countInStartTime = audio.currentTime + 0.2;
+    const countInStartTime = audio.currentTime + SETTINGS.startLeadSec;
     state.startTime = calculateSongStartTime(countInStartTime, SETTINGS.bpm, 8);
     // 振動ズレ対策の初期化: 壁時計アンカーをジャンクの少ないサンプルで確定する。
     // あわせて振動サブシステムをウォームアップ(初回発火の遅延を軽減)。
