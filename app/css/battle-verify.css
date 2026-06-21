@@ -79,7 +79,7 @@ body {
 
 /* --- リズム埋め込み --- */
 .bv-rhythm-prompt { color: var(--bv-muted); font-size: 13px; margin: 0 0 10px; }
-/* 既定曲を使うため選択系UIは隠す(DOMは残す) */
+/* 既定の選択UI・説明コピーは隠す(DOMは残す) */
 .bv-rhythm-embed .hero-copy,
 .bv-rhythm-embed .poc-select-control,
 .bv-rhythm-embed .bpm-control,
@@ -105,6 +105,7 @@ body {
 .bv-log-line.good { color: var(--bv-good); }
 .bv-log-line.bad { color: var(--bv-bad); }
 .bv-log-line.info { color: var(--bv-muted); }
+.bv-log-line.crit { color: #ffd166; font-weight: 800; text-shadow: 0 0 8px rgba(255,209,102,.5); }
 
 /* --- トシ案: リズム役割の選択 --- */
 .bv-mode { background: #141a28; border-radius: 10px; padding: 12px 14px; margin: 4px 0 16px; }
@@ -115,23 +116,65 @@ body {
 #bv-rhythm-next { margin-top: 14px; }
 
 /* =====================================================
-   モバイル: リズム画面を一画面に収める
-   data-stage="rhythm" のとき .bv-app を 100dvh のflex列にし、
-   レーンが残り高さを吸収する。ヘッダーは圧縮、二次要素は非表示。
+   全幅共通: リズム中は画面全体を 100dvh のflex列にし、レーンが残り高さを
+   吸収する。これでPCでもスクロールなしで「次へ」までアクセスできる。
+   (モバイル専用の追加圧縮は下の @media で行う)
+   ===================================================== */
+body[data-stage="rhythm"] { overflow: hidden; }
+body[data-stage="rhythm"] .bv-app {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+body[data-stage="rhythm"] #bv-rhythm {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  gap: 6px;
+}
+body[data-stage="rhythm"] .bv-rhythm-embed {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+body[data-stage="rhythm"] .bv-rhythm-embed .hero-panel { flex: 0 0 auto; }
+body[data-stage="rhythm"] .bv-rhythm-embed .battle-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+/* レーンが余り高さを吸収(縦サイズは必要に応じて縮小) */
+body[data-stage="rhythm"] .bv-rhythm-embed .lane {
+  flex: 1;
+  min-height: 160px;
+  height: auto !important;
+}
+body[data-stage="rhythm"] .bv-rhythm-embed .enemy-area,
+body[data-stage="rhythm"] .bv-rhythm-embed .attack-btn,
+body[data-stage="rhythm"] .bv-rhythm-embed .judge,
+body[data-stage="rhythm"] .bv-rhythm-embed .meter-card { flex: 0 0 auto; }
+/* 流用元の戦闘ログは下部のコメント欄と重複するため隠す */
+body[data-stage="rhythm"] .bv-rhythm-embed .log-card { display: none !important; }
+body[data-stage="rhythm"] #bv-rhythm-next { flex: 0 0 auto; margin-top: 0; }
+/* 下部コメント欄はリズム中は低めに抑える(PCでも収めやすく) */
+body[data-stage="rhythm"] #bv-log { max-height: 84px; }
+
+/* =====================================================
+   モバイル(〜560px): さらに圧縮して一画面に確実に収める
    ===================================================== */
 @media (max-width: 560px) {
   /* 通常時のヘッダー圧縮(全ステージ共通) */
   .bv-app { padding: 10px; }
   .bv-enemy-img { width: 56px; height: 56px; }
 
-  body[data-stage="rhythm"] { overflow: hidden; }
-  body[data-stage="rhythm"] .bv-app {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    gap: 6px;
-  }
+  body[data-stage="rhythm"] .bv-app { padding: 8px; gap: 6px; }
   /* リズム中は補助要素を隠してレーンに高さを回す */
   body[data-stage="rhythm"] .bv-title,
   body[data-stage="rhythm"] .bv-nav,
@@ -144,31 +187,13 @@ body {
   body[data-stage="rhythm"] .bv-enemy-name { font-size: 13px; margin-bottom: 2px; }
   body[data-stage="rhythm"] .bv-hp-row { margin: 2px 0; }
 
-  /* リズム本体を可変領域に */
-  body[data-stage="rhythm"] #bv-rhythm {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    margin: 0;
-    padding: 8px;
-    gap: 4px;
-  }
+  body[data-stage="rhythm"] #bv-rhythm { padding: 8px; gap: 4px; }
   body[data-stage="rhythm"] .bv-rhythm-prompt { font-size: 11px; margin: 0; }
-  body[data-stage="rhythm"] .bv-rhythm-embed {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  /* 流用元の余計な縦要素は隠す(独自ログ・敵ゲージ・曲選択) */
-  body[data-stage="rhythm"] .bv-rhythm-embed .log-card,
+  body[data-stage="rhythm"] .bv-rhythm-embed { gap: 4px; }
+  /* モバイルでは敵ゲージも隠してレーンを最大化 */
   body[data-stage="rhythm"] .bv-rhythm-embed .enemy-area { display: none !important; }
 
   body[data-stage="rhythm"] .bv-rhythm-embed .hero-panel {
-    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -186,34 +211,12 @@ body {
     min-height: 32px;
     font-size: 12px;
   }
-  body[data-stage="rhythm"] .bv-rhythm-embed .battle-card {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin: 0;
-    padding: 8px;
-  }
-  /* レーン: 残り高さを吸収(縦サイズを必要に応じて縮小) */
-  body[data-stage="rhythm"] .bv-rhythm-embed .lane {
-    flex: 1;
-    min-height: 130px;
-    height: auto !important;
-  }
-  body[data-stage="rhythm"] .bv-rhythm-embed .attack-btn { flex: 0 0 auto; min-height: 40px; margin: 0; }
-  body[data-stage="rhythm"] .bv-rhythm-embed .judge { flex: 0 0 auto; min-height: 1.1rem; margin: 0; }
-  /* メーター(スコア/コンボ)は残すが薄く */
-  body[data-stage="rhythm"] .bv-rhythm-embed .meter-card {
-    flex: 0 0 auto;
-    margin: 0;
-    padding: 4px 8px;
-  }
+  body[data-stage="rhythm"] .bv-rhythm-embed .battle-card { gap: 4px; margin: 0; padding: 8px; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .lane { min-height: 130px; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .attack-btn { min-height: 40px; margin: 0; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .judge { min-height: 1.1rem; margin: 0; }
+  body[data-stage="rhythm"] .bv-rhythm-embed .meter-card { margin: 0; padding: 4px 8px; }
   body[data-stage="rhythm"] .bv-rhythm-embed .meter-card div { font-size: 10px; }
   body[data-stage="rhythm"] .bv-rhythm-embed .meter-card strong { font-size: 13px; }
-  /* 「次へ」は常に最下部に固定的に見える(flexの最後) */
-  body[data-stage="rhythm"] #bv-rhythm-next { flex: 0 0 auto; margin: 0; min-height: 40px; }
+  body[data-stage="rhythm"] #bv-rhythm-next { margin: 0; min-height: 40px; }
 }
-
-/* かいしんのいちげき(クリティカル)のログ強調 */
-.bv-log-line.crit { color: #ffd166; font-weight: 800; text-shadow: 0 0 8px rgba(255,209,102,.5); }
