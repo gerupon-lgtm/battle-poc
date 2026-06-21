@@ -237,7 +237,8 @@
           const onFirstTap = (e) => {
             if (e.cancelable) e.preventDefault();
             if (lane) lane.removeEventListener("pointerdown", onFirstTap);
-            if (startBtn) startBtn.click(); // 開始(ユーザー操作内なので音声OK)
+            // 前ラウンド終了で disabled=true のままだと .click() が無視され開始できない→必ず有効化
+            if (startBtn) { startBtn.disabled = false; startBtn.click(); } // 開始(ユーザー操作内なので音声OK)
             beginPlay();
             $("bv-rhythm-prompt").textContent = base + songInfo;
           };
@@ -407,7 +408,7 @@
         const onFirstTap = (e) => {
           if (e.cancelable) e.preventDefault();
           if (lane) lane.removeEventListener("pointerdown", onFirstTap);
-          if (startBtn) startBtn.click();
+          if (startBtn) { startBtn.disabled = false; startBtn.click(); }
           beginPlay();
           updatePrompt();
         };
