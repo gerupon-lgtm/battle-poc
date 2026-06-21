@@ -286,16 +286,35 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
    弱点ねらい案: ターン開始トースト / ターン別背景色 / 攻撃ヒット表示
    ===================================================== */
 #bv-toast {
-  position: fixed; left: 50%; top: 16%;
-  transform: translate(-50%, -8px);
-  background: rgba(15,23,42,0.92); color: #fff;
-  font-weight: 800; font-size: 18px; letter-spacing: .04em;
-  padding: 10px 22px; border-radius: 999px;
-  border: 1px solid rgba(255,255,255,0.18);
-  z-index: 9999; pointer-events: none;
-  opacity: 0; transition: opacity .2s ease, transform .2s ease;
+  position: fixed; left: 50%; top: 18%;
+  transform: translate(-50%, -50%) scale(0.6);
+  background: rgba(15,23,42,0.94); color: #fff;
+  font-weight: 900; font-size: 30px; letter-spacing: .06em; line-height: 1.1;
+  padding: 16px 40px; border-radius: 16px;
+  border: 2px solid rgba(255,255,255,0.85);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5), 0 0 0 6px rgba(255,255,255,0.06);
+  z-index: 9999; pointer-events: none; white-space: nowrap;
+  opacity: 0;
 }
-#bv-toast.show { opacity: 1; transform: translate(-50%, 0); }
+#bv-toast.show { animation: bv-toast-pop 1.5s cubic-bezier(.18,.9,.3,1.2) forwards; }
+@keyframes bv-toast-pop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5)  rotate(-3deg); }
+  14%  { opacity: 1; transform: translate(-50%, -50%) scale(1.18) rotate(2deg); }
+  26%  { opacity: 1; transform: translate(-50%, -50%) scale(0.96) rotate(0deg); }
+  34%  { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+  44%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  82%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -76%) scale(0.92); }
+}
+/* 種別カラー(クイズ=琥珀 / 攻撃=赤 / 防御=青) */
+#bv-toast.kind-quiz    { background: linear-gradient(135deg,#b45309,#f59e0b); border-color:#fde68a;
+  box-shadow: 0 12px 40px rgba(245,158,11,.5), 0 0 0 6px rgba(245,158,11,.18); }
+#bv-toast.kind-attack  { background: linear-gradient(135deg,#991b1b,#ef4444); border-color:#fecaca;
+  box-shadow: 0 12px 40px rgba(239,68,68,.5), 0 0 0 6px rgba(239,68,68,.18); }
+#bv-toast.kind-defense { background: linear-gradient(135deg,#1e40af,#3b82f6); border-color:#bfdbfe;
+  box-shadow: 0 12px 40px rgba(59,130,246,.5), 0 0 0 6px rgba(59,130,246,.18); }
+@media (max-width: 560px) { #bv-toast { font-size: 23px; padding: 13px 28px; } }
 
 /* ターン別 背景色(レーン) */
 .bv-rhythm-embed .lane[data-phase="attack"] {

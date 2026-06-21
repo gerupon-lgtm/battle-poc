@@ -1726,6 +1726,8 @@
   window.RhythmAttack = {
     setMarkerMode: function (on) { SETTINGS.markerAttackMode = !!on; },
     tapNote: function (event) { attack(event); }, // 防御: レーン内どこでもタップ→ノーツ判定
+    setBars: function (n) { if (Number.isFinite(n) && n > 0) SETTINGS.bars = n; },
+    getBars: function () { return SETTINGS.bars; },
     judgeBeatTap: function (event) {
       if (!state.running || state.countingIn) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };
       const beat = beatSeconds(SETTINGS.bpm);

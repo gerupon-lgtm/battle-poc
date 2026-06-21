@@ -30,9 +30,12 @@
     const enemy = core.state.enemy;
     const learned = [];
     const patSeq = window.BattleCore.createPatternSequencer();
+    // 弱点案は短めの4小節で1ターンとする(エンジンは各ページ独立インスタンスのため他案に影響なし)
+    if (window.RhythmAttack && window.RhythmAttack.setBars) window.RhythmAttack.setBars(4);
 
     while (!core.isOver()) {
       // 1. クイズ(毎サイクル)。正解で弱点可視化＋攻撃バフ。
+      if (core.toast) core.toast("はしけん出題！", "quiz");
       const quiz = window.QuizEngine.next(CONFIG.QUIZ_CHOICES);
       const ans = await core.showQuiz(quiz, { revealExplanation: false });
       learned.push(quiz);

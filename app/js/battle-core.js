@@ -178,13 +178,15 @@
     // 開始前に曲をランダム選択(パターンは patternId 指定 or ランダム)し、
     // ユーザーが[戦闘開始]を押すと開始する。撃破 or 時間切れで結果を表示し、
     // ［次へ］を押してから {score, combo, cleared} を解決する(=次のターンへ進む)。
-    function showTurnToast(text) {
+    function showTurnToast(text, kind) {
       if (!text) return;
       let t = document.getElementById("bv-toast");
       if (!t) { t = document.createElement("div"); t.id = "bv-toast"; document.body.appendChild(t); }
       t.textContent = text;
-      t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
-      setTimeout(() => t.classList.remove("show"), 1400);
+      t.className = kind ? ("kind-" + kind) : "";
+      void t.offsetWidth; t.classList.add("show");
+      clearTimeout(t._timer);
+      t._timer = setTimeout(() => t.classList.remove("show"), 1500);
     }
     function setLanePhase(phase) {
       const lane = document.getElementById("lane");
@@ -205,9 +207,11 @@
       return new Promise((resolve) => {
         showStage("rhythm");
         clearRhythmResult();
+        // このラウンドは通常ノーツを使う(攻撃マーカーモードを必ず解除=防御が無反応になるのを防ぐ)
+        if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
         if (!opts.skipEnemyBg) setLaneEnemyBackground(state.enemy.image);
         setLanePhase(opts.phase);
-        if (opts.phase) showTurnToast(opts.turnLabel || (opts.phase === "attack" ? "攻撃ターン!" : "防御ターン!"));
+        if (opts.phase) showTurnToast(opts.turnLabel || (opts.phase === "attack" ? "攻撃ターン!" : "防御ターン!"), opts.phase);
         const lane = document.getElementById("lane");
         const songName = pickRandomSong();
         const patName = applyPattern(patternId);
@@ -252,7 +256,11 @@
             window.RhythmBridge.onRoundEnd = null;
             if (lane) lane.removeEventListener("pointerdown", laneDefend);
             if (startBtn) startBtn.disabled = true;
-            if (opts.turnLabel) { const res = $("battle-result"); if (res) { res.hidden = true; res.className = "battle-result"; } }
+            if (opts.turnLabel) {
+              const title = $("battle-result-title"); if (title) title.textContent = opts.turnLabel + "終了";
+              const detail = $("battle-result-detail"); if (detail) detail.textContent = "";
+              const res = $("battle-result"); if (res) { res.hidden = false; res.className = "battle-result"; }
+            }
             setLanePhase("");
             $("bv-rhythm-prompt").textContent =
               (opts.turnLabel ? opts.turnLabel + "終了 — ［次へ］を押してください"
@@ -346,7 +354,7 @@
         if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(true);
         const lane = document.getElementById("lane");
         setLanePhase("attack");
-        showTurnToast(opts.turnLabel || "攻撃ターン!");
+        showTurnToast(opts.turnLabel || "攻撃ターン!", "attack");
         let marker = null;
         placeWeakpoint(!!opts.visible).then((m) => { marker = m; });
         const songName = pickRandomSong();
@@ -413,10 +421,11 @@
             if (lane) { lane.removeEventListener("pointerdown", onLaneTap); lane.removeEventListener("pointerdown", onFirstTap); }
             if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
             if (startBtn) startBtn.disabled = true;
-            const res = $("battle-result"); if (res) { res.hidden = true; res.className = "battle-result"; }
+            const title = $("battle-result-title"); if (title) title.textContent = "攻撃ターン終了";
+            const detail = $("battle-result-detail"); if (detail) detail.textContent = "PERFECT " + tally.perfect + " / GOOD " + tally.good;
+            const res = $("battle-result"); if (res) { res.hidden = false; res.className = "battle-result"; }
             setLanePhase("");
-            $("bv-rhythm-prompt").textContent =
-              "攻撃ターン終了 — PERFECT " + tally.perfect + " / GOOD " + tally.good + " ｜ ［次へ］を押してください";
+            $("bv-rhythm-prompt").textContent = "攻撃ターン終了 ｜ ［次へ］を押してください";
             const next = $("bv-rhythm-next");
             next.classList.remove("hidden");
             next.onclick = () => {
@@ -493,6 +502,7 @@
       showStage,
       runRhythmRound,
       runAttackRound,
+      toast: showTurnToast,
       placeWeakpoint,
       clearWeakpoint,
       showQuiz,
