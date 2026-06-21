@@ -727,6 +727,33 @@
     return true;
   }
 
+  // 合成アニメーション(Web Animations API)の描画タイミングに合わせて振動する。
+  // 拍の視覚発光は performance.now 基準の state.visualSongStartMs + 拍×beatMs で発生するため、
+  // 音声時計ではなく同じ壁時計で予約し、見た目の拍と振動を一致させる(Androidの違和感対策)。
+  function scheduleHapticVisual(targetWallMs, maxLateMs = 80) {
+    if (!state.hapticEnabled || !supportsVibration(window.navigator)) return false;
+    if (!Number.isFinite(targetWallMs)) return false;
+    const delayMs = targetWallMs - performance.now();
+    if (delayMs < -maxLateMs) return false;
+    const timer = setTimeout(() => {
+      state.hapticTimers.delete(timer);
+      const lateMs = performance.now() - targetWallMs;
+      if (
+        !state.running ||
+        !state.hapticEnabled ||
+        document.visibilityState !== "visible" ||
+        lateMs > maxLateMs
+      ) return;
+      try {
+        navigator.vibrate(15);
+      } catch (_) {
+        // Unsupported hardware or OS policy must not affect gameplay.
+      }
+    }, Math.max(0, delayMs));
+    state.hapticTimers.add(timer);
+    return true;
+  }
+
   function cancelVisualAnimations() {
     for (const animation of state.visualAnimations) {
       try {
@@ -1116,7 +1143,12 @@
     ) {
       const beatTime = state.startTime + state.nextBeat * beat;
       scheduleSongBeat(state.songId, state.nextBeat, beatTime);
-      scheduleHaptic(beatTime);
+      if (state.compositorVisuals) {
+        // 合成アニメの拍発光と同じ壁時計で振動を予約し、見た目と一致させる
+        scheduleHapticVisual(state.visualSongStartMs + state.nextBeat * beat * 1000);
+      } else {
+        scheduleHaptic(beatTime);
+      }
       if (state.hintEnabled) {
         const cue = buildHintCue(state.songId, state.nextBeat);
         for (const hint of buildHintEventsForBeat(state.chart, state.nextBeat)) {

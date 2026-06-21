@@ -6,7 +6,7 @@
 //   - クイズパネルの描画と回答待ち
 //   - リズムラウンドの実行(rhythm-battle-poc.js を流用、曲はランダム/パターンは指定可)
 //   - 敵ダメージの共通計算(絶対値基準±乱数 + かいしんのいちげき)
-//   - タップパターンの進行管理 / Android振動OFF
+//   - タップパターンの進行管理
 // リズム部分のラウンド終了は window.RhythmBridge.onRoundEnd 経由で受け取る。
 // =====================================================
 (function () {
@@ -258,23 +258,6 @@
       showQuiz,
       showFinish,
     };
-  }
-
-  // Android では振動(ハプティクス)を既定でOFFにする(違和感低減のため)
-  if (typeof window !== "undefined" && window.addEventListener) {
-    window.addEventListener("DOMContentLoaded", function () {
-      try {
-        if (/Android/i.test(navigator.userAgent || "")) {
-          const h = document.getElementById("haptic-toggle");
-          if (h) {
-            h.checked = false;
-            h.disabled = true;
-          }
-          const lbl = document.getElementById("haptic-label");
-          if (lbl) lbl.textContent = "振動×";
-        }
-      } catch (e) {}
-    });
   }
 
   window.BattleCore = { create, rollDamage, createPatternSequencer };
