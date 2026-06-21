@@ -1500,7 +1500,7 @@
 
     for (const note of state.chart) {
       const until = note.time - now;
-      if (until < -0.16 && !note.hit && !note.missed) {
+      if (until < -0.16 && !note.hit && !note.missed && !state.defeated) {
         note.missed = true;
         removeNoteElement(note.id);
         state.combo = 0;
