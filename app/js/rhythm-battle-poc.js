@@ -1095,13 +1095,20 @@
     }
 
     const startDelayMs = Math.max(0, (state.startTime - state.audio.currentTime) * 1000);
+    // 入力受付は最初の音(ダウンビート)の少し前から開く。最初のノーツが曲頭(時刻0)に
+    // ある譜面で、頭ぴったり〜わずかに先行したタップが取りこぼされてMISSになるのを防ぐ。
+    // 先行量はGOOD判定窓ぶん(±180ms)とし、GOOD内の早入力を確実に受け付ける。
+    const inputLeadMs = SETTINGS.goodMs;
+    const inputEnableDelayMs = Math.max(0, startDelayMs - inputLeadMs);
     state.countTimers.push(setTimeout(() => {
       state.countingIn = false;
+      $("attack-btn").disabled = false;
+      $("start-btn").disabled = false;
+    }, inputEnableDelayMs));
+    state.countTimers.push(setTimeout(() => {
       countEl.textContent = "START!";
       if (state.compositorVisuals) resetVisualBeatGuide();
       else updateVisualBeatGuide(0, true);
-      $("attack-btn").disabled = false;
-      $("start-btn").disabled = false;
       addLog("戦闘開始。リズムに合わせてこうげき!");
       state.countTimers.push(setTimeout(() => {
         countEl.hidden = true;
