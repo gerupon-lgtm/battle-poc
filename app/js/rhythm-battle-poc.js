@@ -119,6 +119,18 @@
     return index >= 0 && index < songBeatCount(bars, beatsPerBar);
   }
 
+  // 撃破時の鳴動(リングアウト)終了拍を求める。
+  // 少なくとも撃破した拍の小節末まで鳴らし、4拍目(小節最終拍)での撃破は次の1小節も鳴らす。
+  // 戻り値は曲頭からの通算拍(曲末でキャップ)。
+  function defeatRingOutBeat(hitSongTime, bpm, bars, beatsPerBar = 4) {
+    const beat = beatSeconds(bpm);
+    const beatPos = hitSongTime / beat + 1e-6; // 4拍ちょうどの浮動小数点誤差対策
+    const barIndex = Math.floor(beatPos / beatsPerBar);
+    const beatInBar = ((Math.floor(beatPos) % beatsPerBar) + beatsPerBar) % beatsPerBar;
+    const extraBars = beatInBar === beatsPerBar - 1 ? 2 : 1;
+    return Math.min((barIndex + extraBars) * beatsPerBar, songBeatCount(bars, beatsPerBar));
+  }
+
   function stopTrackedSources(sources) {
     let stopped = 0;
     for (const source of sources) {
@@ -498,6 +510,7 @@
       songBeatCount,
       songDurationSeconds,
       shouldScheduleBeat,
+      defeatRingOutBeat,
       calculateHitY,
       shouldConsumeNote,
       stopTrackedSources,
@@ -601,6 +614,8 @@
     raf: 0,
     scheduler: 0,
     nextBeat: 0,
+    defeated: false,
+    ringOutBeat: Infinity,
     running: false,
     countingIn: false,
     countTimers: [],
@@ -1154,6 +1169,7 @@
     const beat = beatSeconds(SETTINGS.bpm);
     while (
       shouldScheduleBeat(state.nextBeat, SETTINGS.bars, 4) &&
+      state.nextBeat < state.ringOutBeat &&
       state.startTime + state.nextBeat * beat < audio.currentTime + SETTINGS.lookAheadSec
     ) {
       const beatTime = state.startTime + state.nextBeat * beat;
@@ -1172,7 +1188,7 @@
       }
       state.nextBeat += 1;
     }
-    if (!shouldScheduleBeat(state.nextBeat, SETTINGS.bars, 4)) {
+    if (!shouldScheduleBeat(state.nextBeat, SETTINGS.bars, 4) || state.nextBeat >= state.ringOutBeat) {
       clearInterval(state.scheduler);
       state.scheduler = 0;
     }
@@ -1339,6 +1355,8 @@
       patternId: state.patternId,
     });
     state.nextBeat = 0;
+    state.defeated = false;
+    state.ringOutBeat = Infinity;
     state.enemyMaxHp = calculateEnemyMaxHp(state.chart, SETTINGS.clearHpRatio);
     state.enemyHp = state.enemyMaxHp;
     state.combo = 0;
@@ -1393,6 +1411,35 @@
     return best;
   }
 
+  // 撃破処理: 即停止せず撃破表示をしたうえで、小節末(または次の1小節)まで鳴動させる。
+  function handleDefeat(hitSongTime) {
+    state.defeated = true;
+    clearVisualNotes();
+    showDiagnosticsSummary("victory");
+    $("attack-btn").disabled = true;
+    $("battle-result-title").textContent = "撃破！";
+    $("battle-result-detail").textContent = formatDefeatMessage(state.score, state.combo);
+    $("battle-result").className = "battle-result victory";
+    $("battle-result").hidden = false;
+    // 鳴動範囲を決定し、スケジューラの予約上限に設定
+    const beat = beatSeconds(SETTINGS.bpm);
+    state.ringOutBeat = defeatRingOutBeat(hitSongTime, SETTINGS.bpm, SETTINGS.bars);
+    // 時間切れ完了タイマーは無効化(撃破済みのため)
+    clearTimeout(state.songEndTimer);
+    // 鳴動終了時刻に停止＋ラウンド終了通知を予約(songEndTimer 枠を再利用)
+    const stopAtSec = state.startTime + state.ringOutBeat * beat;
+    const delayMs = Math.max(0, (stopAtSec - state.audio.currentTime) * 1000);
+    state.songEndTimer = setTimeout(finishDefeatRingOut, delayMs);
+  }
+
+  function finishDefeatRingOut() {
+    stopPlayback();
+    $("start-btn").disabled = false;
+    if (window.RhythmBridge && window.RhythmBridge.onRoundEnd) {
+      window.RhythmBridge.onRoundEnd({ score: state.score, combo: state.combo, cleared: true });
+    }
+  }
+
   function attack(event) {
     if (event) event.preventDefault();
     if (state.calibrating) {
@@ -1404,6 +1451,7 @@
       state.debugLastTap = state.countingIn ? "ignored:count-in" : "ignored:not-running";
       return;
     }
+    if (state.defeated) return; // 撃破後はリングアウト中。入力は受け付けない。
     const nearest = findNearestNote(inputSongTime(event));
     if (!nearest) return;
     const result = judgeHit(nearest.diffMs, SETTINGS);
@@ -1423,18 +1471,7 @@
       addLog(result.label + "! " + damage + "ダメージ");
       if (state.enemyHp <= 0) {
         addLog("ビートスライムを撃破!");
-        stopPlayback();
-        clearVisualNotes();
-        showDiagnosticsSummary("victory");
-        $("attack-btn").disabled = true;
-        $("start-btn").disabled = false;
-        $("battle-result-title").textContent = "撃破！";
-        $("battle-result-detail").textContent = formatDefeatMessage(state.score, state.combo);
-        if (window.RhythmBridge && window.RhythmBridge.onRoundEnd) {
-          window.RhythmBridge.onRoundEnd({ score: state.score, combo: state.combo, cleared: true });
-        }
-        $("battle-result").className = "battle-result victory";
-        $("battle-result").hidden = false;
+        handleDefeat(nearest.note.time);
       }
     }
     showJudge(result, nearest.diffMs);
