@@ -13,11 +13,13 @@
   const CONFIG = {
     PLAYER_HP: 100,
     QUIZ_CHOICES: 2,
-    // 攻撃: 弱点ミート1回あたりのダメージ(ラウンド合計をCAPで上限)
-    ATTACK_PERFECT_DAMAGE: 2,
-    ATTACK_GOOD_DAMAGE: 1,
+    // 攻撃: 正規化方式 = 最大火力 × 成功割合 × バフ
+    //   frac = (PERFECT×1 + GOOD×GOOD_WEIGHT) / 総拍数(4小節=16)
+    //   dmg  = round(ATTACK_MAX_PER_TURN × frac × (正解?QUIZ_BUFF_MULT:1))
+    // 小節数・判定窓を変えてもダメージが安定し、1ターン最大火力を先に決められる。
+    ATTACK_MAX_PER_TURN: 25,    // 1ターンの基礎最大ダメージ(バフ無し・全PERFECT)
+    GOOD_WEIGHT: 0.5,           // GOODの寄与(PERFECT=1.0基準)
     QUIZ_BUFF_MULT: 1.5,        // クイズ正解時の攻撃バフ
-    ATTACK_ROUND_CAP: 40,       // 1攻撃ターンの最大ダメージ
     // 防御: Miss1回あたりの被ダメージ
     DEFENSE_MISS_DAMAGE: 8,
   };
@@ -54,8 +56,11 @@
         { visible: buffed, turnLabel: "攻撃ターン" }
       );
       const mult = buffed ? CONFIG.QUIZ_BUFF_MULT : 1;
-      const raw = atk.perfect * CONFIG.ATTACK_PERFECT_DAMAGE + atk.good * CONFIG.ATTACK_GOOD_DAMAGE;
-      const dmg = Math.min(Math.round(raw * mult), CONFIG.ATTACK_ROUND_CAP);
+      const totalBeats = (window.RhythmAttack && window.RhythmAttack.getBars)
+        ? window.RhythmAttack.getBars() * 4 : 16; // 4小節×4拍=総ノート(拍)数
+      const frac = totalBeats > 0
+        ? (atk.perfect + atk.good * CONFIG.GOOD_WEIGHT) / totalBeats : 0; // 成功割合 0〜1
+      const dmg = Math.round(CONFIG.ATTACK_MAX_PER_TURN * frac * mult);
       if (dmg > 0) {
         core.damageEnemy(dmg);
         core.log(
