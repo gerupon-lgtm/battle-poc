@@ -48,7 +48,7 @@
           ? "攻撃: 光る弱点を拍に合わせてタップ!"
           : "攻撃: 弱点は非表示。位置を探して拍に合わせてタップ",
         null,
-        { visible: buffed }
+        { visible: buffed, turnLabel: "攻撃ターン" }
       );
       const mult = buffed ? CONFIG.QUIZ_BUFF_MULT : 1;
       const raw = atk.perfect * CONFIG.ATTACK_PERFECT_DAMAGE + atk.good * CONFIG.ATTACK_GOOD_DAMAGE;
@@ -67,8 +67,9 @@
 
       // 4. 防御ターン(従来リズム)。Miss で被弾。
       const def = await core.runRhythmRound(
-        "防御: ノーツを Perfect/Good で受け、Miss で被弾",
-        patSeq.next()
+        "防御: 画面のどこでもタップで受ける(Perfect/Good=防御, Miss=被弾)",
+        patSeq.next(),
+        { phase: "defense", skipEnemyBg: true, tapToStart: true, tapAnywhere: true, turnLabel: "防御ターン" }
       );
       patSeq.update(def.cleared);
       const misses = def.misses || 0;

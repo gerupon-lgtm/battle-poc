@@ -178,34 +178,91 @@
     // 開始前に曲をランダム選択(パターンは patternId 指定 or ランダム)し、
     // ユーザーが[戦闘開始]を押すと開始する。撃破 or 時間切れで結果を表示し、
     // ［次へ］を押してから {score, combo, cleared} を解決する(=次のターンへ進む)。
-    function runRhythmRound(prompt, patternId) {
+    function showTurnToast(text) {
+      if (!text) return;
+      let t = document.getElementById("bv-toast");
+      if (!t) { t = document.createElement("div"); t.id = "bv-toast"; document.body.appendChild(t); }
+      t.textContent = text;
+      t.classList.remove("show"); void t.offsetWidth; t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1400);
+    }
+    function setLanePhase(phase) {
+      const lane = document.getElementById("lane");
+      if (!lane) return;
+      if (phase) lane.setAttribute("data-phase", phase); else lane.removeAttribute("data-phase");
+    }
+    function songInfoLabel(songName, patName) {
+      return (songName ? "（曲: " + songName : "") +
+        (patName ? (songName ? " / タップ: " : "（タップ: ") + patName : "") +
+        (songName || patName ? "）" : "");
+    }
+
+    // リズムラウンド。opts(任意): phase("attack"/"defense"=トースト+背景色), skipEnemyBg,
+    //   tapToStart(画面タップで開始/開始ボタン非表示), tapAnywhere(レーン内どこでもタップ=防御),
+    //   turnLabel(終了表示など)。opts無しは従来動作(tantan/toshi)。
+    function runRhythmRound(prompt, patternId, opts) {
+      opts = opts || {};
       return new Promise((resolve) => {
         showStage("rhythm");
         clearRhythmResult();
-        setLaneEnemyBackground(state.enemy.image); // 背景に敵キャラ
-        const songName = pickRandomSong(); // 曲は常にランダム
-        const patName = applyPattern(patternId); // パターンは指定 or ランダム
+        if (!opts.skipEnemyBg) setLaneEnemyBackground(state.enemy.image);
+        setLanePhase(opts.phase);
+        if (opts.phase) showTurnToast(opts.turnLabel || (opts.phase === "attack" ? "攻撃ターン!" : "防御ターン!"));
+        const lane = document.getElementById("lane");
+        const songName = pickRandomSong();
+        const patName = applyPattern(patternId);
+        const songInfo = songInfoLabel(songName, patName);
         const startBtn = $("start-btn");
-        if (startBtn) startBtn.disabled = false;
+        const attackBtn = $("attack-btn");
         const base = prompt || "下の［戦闘開始］を押してリズムを開始してください";
-        const extra =
-          (songName ? "（曲: " + songName : "") +
-          (patName ? (songName ? " / タップ: " : "（タップ: ") + patName : "") +
-          (songName || patName ? "）" : "");
-        $("bv-rhythm-prompt").textContent = base + extra;
+
+        function laneDefend(ev) {
+          if (ev.cancelable) ev.preventDefault();
+          if (window.RhythmAttack && window.RhythmAttack.tapNote) window.RhythmAttack.tapNote(ev);
+        }
+        let started = false;
+        function beginPlay() {
+          if (started) return; started = true;
+          if (opts.tapAnywhere && lane) lane.addEventListener("pointerdown", laneDefend);
+        }
+
+        if (opts.tapToStart) {
+          if (startBtn) startBtn.style.display = "none";
+          if (attackBtn) attackBtn.style.display = "none";
+          $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始" + songInfo;
+          const onFirstTap = (e) => {
+            if (e.cancelable) e.preventDefault();
+            if (lane) lane.removeEventListener("pointerdown", onFirstTap);
+            if (startBtn) startBtn.click(); // 開始(ユーザー操作内なので音声OK)
+            beginPlay();
+            $("bv-rhythm-prompt").textContent = base + songInfo;
+          };
+          if (lane) lane.addEventListener("pointerdown", onFirstTap);
+        } else {
+          if (startBtn) { startBtn.style.display = ""; startBtn.disabled = false; }
+          if (opts.tapAnywhere && attackBtn) attackBtn.style.display = "none";
+          $("bv-rhythm-prompt").textContent = base + songInfo;
+        }
+
         let done = false;
         window.RhythmBridge = {
           onRoundEnd: (r) => {
             if (done) return;
             done = true;
             window.RhythmBridge.onRoundEnd = null;
-            if (startBtn) startBtn.disabled = true; // 再演奏を防止
+            if (lane) lane.removeEventListener("pointerdown", laneDefend);
+            if (startBtn) startBtn.disabled = true;
+            if (opts.turnLabel) { const res = $("battle-result"); if (res) { res.hidden = true; res.className = "battle-result"; } }
+            setLanePhase("");
             $("bv-rhythm-prompt").textContent =
-              "リズム結果を確認して［次へ］を押してください";
+              (opts.turnLabel ? opts.turnLabel + "終了 — ［次へ］を押してください"
+                              : "リズム結果を確認して［次へ］を押してください");
             const next = $("bv-rhythm-next");
             next.classList.remove("hidden");
             next.onclick = () => {
               next.classList.add("hidden");
+              if (attackBtn) attackBtn.style.display = "";
+              if (startBtn) startBtn.style.display = "";
               resolve(r);
             };
           },
@@ -274,14 +331,13 @@
     }
 
     function clearWeakpoint() {
+      // マーカーのみ消す。敵<img>は戦闘中は保持(毎ターン再生成すると2回目以降に表示が崩れるため)。
       const m = document.getElementById("bv-weakpoint");
       if (m) m.remove();
-      const img = document.getElementById("bv-lane-enemy-img");
-      if (img) img.remove();
     }
 
-    // 攻撃ラウンド: 弱点マーカーを置き、拍タイミング×弱点位置の両方を満たすタップを集計する。
-    // 解決値: { perfect, good, hits } と元のリズム結果 r。
+    // 攻撃ラウンド: 弱点マーカーを置き、拍タイミング×弱点位置の両方を満たすタップを集計。
+    // 画面タップで開始(開始/こうげきボタンは非表示)。ヒットは弱点可視/不可視に関わらず明示表示。
     function runAttackRound(prompt, patternId, opts) {
       opts = opts || {};
       return new Promise((resolve) => {
@@ -289,42 +345,64 @@
         clearRhythmResult();
         if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(true);
         const lane = document.getElementById("lane");
+        setLanePhase("attack");
+        showTurnToast(opts.turnLabel || "攻撃ターン!");
         let marker = null;
         placeWeakpoint(!!opts.visible).then((m) => { marker = m; });
         const songName = pickRandomSong();
         const patName = applyPattern(patternId);
+        const songInfo = songInfoLabel(songName, patName);
         const startBtn = $("start-btn");
-        if (startBtn) startBtn.disabled = false;
-        const base = prompt || "［戦闘開始］を押し、弱点を拍に合わせてタップ";
-        const extra =
-          (songName ? "（曲: " + songName : "") +
-          (patName ? (songName ? " / タップ: " : "（タップ: ") + patName : "") +
-          (songName || patName ? "）" : "");
-        $("bv-rhythm-prompt").textContent = base + extra;
-
+        const attackBtn = $("attack-btn");
+        if (attackBtn) attackBtn.style.display = "none";
+        const base = prompt || "弱点を拍に合わせてタップ";
         const usedBeats = new Set();
         const tally = { perfect: 0, good: 0 };
-        function flashMarker(rank) {
+        function updatePrompt() {
+          $("bv-rhythm-prompt").textContent = base + " ｜ PERFECT " + tally.perfect + " / GOOD " + tally.good;
+        }
+        function floatHit(rank, text) {
           const m = document.getElementById("bv-weakpoint");
-          if (!m) return;
-          m.classList.add("hit-" + rank);
-          setTimeout(() => m.classList.remove("hit-" + rank), 160);
+          if (m) { m.classList.add("hit-" + rank); setTimeout(() => m.classList.remove("hit-" + rank), 180); }
+          if (marker && lane) {
+            const f = document.createElement("div");
+            f.className = "bv-hitfx " + rank;
+            f.textContent = text;
+            f.style.left = (marker.u * 100) + "%";
+            f.style.top = (marker.v * 100) + "%";
+            lane.appendChild(f);
+            setTimeout(() => f.remove(), 520);
+          }
+          const jd = $("judge"); if (jd) { jd.textContent = text; jd.className = "judge " + (rank === "good" ? "good" : rank === "perfect" ? "perfect" : "miss"); }
         }
         function onLaneTap(ev) {
           if (!marker) return;
           if (ev.cancelable) ev.preventDefault();
           const lr = lane.getBoundingClientRect();
           const mx = lr.width * marker.u, my = lr.height * marker.v;
-          const tx = ev.clientX - lr.left, ty = ev.clientY - lr.top;
-          if (Math.hypot(tx - mx, ty - my) > marker.rPx) return; // 弱点を外した
+          const within = Math.hypot((ev.clientX - lr.left) - mx, (ev.clientY - lr.top) - my) <= marker.rPx;
           const j = window.RhythmAttack ? window.RhythmAttack.judgeBeatTap(ev) : { valid: false };
-          if (!j.valid || usedBeats.has(j.beatIndex)) return; // 1拍1回
+          if (!within) { floatHit("miss", "位置×"); return; } // 弱点を外した(空間)
+          if (!j.valid) return;
+          if (usedBeats.has(j.beatIndex)) return; // 1拍1回
           usedBeats.add(j.beatIndex);
-          if (j.rank === "perfect") { tally.perfect += 1; flashMarker("perfect"); }
-          else if (j.rank === "good") { tally.good += 1; flashMarker("good"); }
-          else { flashMarker("miss"); }
+          if (j.rank === "perfect") { tally.perfect += 1; floatHit("perfect", "PERFECT"); updatePrompt(); }
+          else if (j.rank === "good") { tally.good += 1; floatHit("good", "GOOD"); updatePrompt(); }
+          else { floatHit("miss", "タイミング×"); }
         }
-        lane.addEventListener("pointerdown", onLaneTap);
+        let started = false;
+        function beginPlay() { if (started) return; started = true; if (lane) lane.addEventListener("pointerdown", onLaneTap); }
+
+        if (startBtn) startBtn.style.display = "none";
+        $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始（弱点を拍でタップ）" + songInfo;
+        const onFirstTap = (e) => {
+          if (e.cancelable) e.preventDefault();
+          if (lane) lane.removeEventListener("pointerdown", onFirstTap);
+          if (startBtn) startBtn.click();
+          beginPlay();
+          updatePrompt();
+        };
+        if (lane) lane.addEventListener("pointerdown", onFirstTap);
 
         let done = false;
         window.RhythmBridge = {
@@ -332,16 +410,20 @@
             if (done) return;
             done = true;
             window.RhythmBridge.onRoundEnd = null;
-            lane.removeEventListener("pointerdown", onLaneTap);
+            if (lane) { lane.removeEventListener("pointerdown", onLaneTap); lane.removeEventListener("pointerdown", onFirstTap); }
             if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
             if (startBtn) startBtn.disabled = true;
             const res = $("battle-result"); if (res) { res.hidden = true; res.className = "battle-result"; }
-            $("bv-rhythm-prompt").textContent = "攻撃結果を確認して［次へ］を押してください";
+            setLanePhase("");
+            $("bv-rhythm-prompt").textContent =
+              "攻撃ターン終了 — PERFECT " + tally.perfect + " / GOOD " + tally.good + " ｜ ［次へ］を押してください";
             const next = $("bv-rhythm-next");
             next.classList.remove("hidden");
             next.onclick = () => {
               next.classList.add("hidden");
               clearWeakpoint();
+              if (startBtn) startBtn.style.display = "";
+              if (attackBtn) attackBtn.style.display = "";
               resolve({ perfect: tally.perfect, good: tally.good, hits: tally.perfect + tally.good, rhythm: r });
             };
           },

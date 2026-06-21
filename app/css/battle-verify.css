@@ -281,3 +281,43 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50% { transform: translate(-50%, -50%) scale(1.25); }
 }
+
+/* =====================================================
+   弱点ねらい案: ターン開始トースト / ターン別背景色 / 攻撃ヒット表示
+   ===================================================== */
+#bv-toast {
+  position: fixed; left: 50%; top: 16%;
+  transform: translate(-50%, -8px);
+  background: rgba(15,23,42,0.92); color: #fff;
+  font-weight: 800; font-size: 18px; letter-spacing: .04em;
+  padding: 10px 22px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.18);
+  z-index: 9999; pointer-events: none;
+  opacity: 0; transition: opacity .2s ease, transform .2s ease;
+}
+#bv-toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ターン別 背景色(レーン) */
+.bv-rhythm-embed .lane[data-phase="attack"] {
+  box-shadow: inset 0 0 70px rgba(255,90,90,0.22), 0 0 0 2px rgba(255,90,90,0.4);
+}
+.bv-rhythm-embed .lane[data-phase="defense"] {
+  box-shadow: inset 0 0 70px rgba(90,150,255,0.22), 0 0 0 2px rgba(90,150,255,0.4);
+}
+
+/* 攻撃ヒットのフロート表示(弱点が可視/不可視に関わらずヒットを明示) */
+.bv-hitfx {
+  position: absolute; transform: translate(-50%, -50%);
+  z-index: 7; pointer-events: none;
+  font-weight: 900; font-size: 15px; white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  animation: bv-hitfx-rise 0.52s ease-out forwards;
+}
+.bv-hitfx.perfect { color: #facc15; }
+.bv-hitfx.good { color: #22d3ee; }
+.bv-hitfx.miss { color: #ff9a9a; font-size: 13px; }
+@keyframes bv-hitfx-rise {
+  0% { opacity: 0; transform: translate(-50%, -30%) scale(0.8); }
+  20% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -160%) scale(1.05); }
+}

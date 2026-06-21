@@ -1725,6 +1725,7 @@
   // 空間判定(弱点位置)はフロー側で行い、これは時間判定のみ(厳しめ窓)を返す。
   window.RhythmAttack = {
     setMarkerMode: function (on) { SETTINGS.markerAttackMode = !!on; },
+    tapNote: function (event) { attack(event); }, // 防御: レーン内どこでもタップ→ノーツ判定
     judgeBeatTap: function (event) {
       if (!state.running || state.countingIn) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };
       const beat = beatSeconds(SETTINGS.bpm);
