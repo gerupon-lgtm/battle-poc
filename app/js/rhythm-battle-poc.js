@@ -24,6 +24,8 @@
     // 攻撃の拍タップ判定窓(防御の PERFECT ±80 / GOOD ±180 より厳しめ)。
     attackPerfectMs: 50,
     attackGoodMs: 110,
+    // 防御モード(弱点案): タップ判定は行うが敵ダメージ/撃破は発生させない(防御ターンで「撃破」を出さない)。
+    defenseNoEnemyDamage: false,
   };
 
   const CALIBRATION_STORAGE_KEY = "rhythmBattleTimingCalibration";
@@ -1562,13 +1564,18 @@
       addLog("ミス! 攻撃は空を切った");
     } else {
       const damage = result.damage + (nearest.note.accent ? 6 : 0);
-      state.enemyHp = Math.max(0, state.enemyHp - damage);
       state.combo += 1;
       state.score += result.rank === "perfect" ? 1200 : 600;
-      addLog(result.label + "! " + damage + "ダメージ");
-      if (state.enemyHp <= 0) {
-        addLog("ビートスライムを撃破!");
-        handleDefeat(nearest.note.time);
+      if (SETTINGS.defenseNoEnemyDamage) {
+        // 防御モード: 敵ダメージ/撃破は出さない(防御成功の演出のみ)
+        addLog(result.label + "! 防御成功");
+      } else {
+        state.enemyHp = Math.max(0, state.enemyHp - damage);
+        addLog(result.label + "! " + damage + "ダメージ");
+        if (state.enemyHp <= 0) {
+          addLog("ビートスライムを撃破!");
+          handleDefeat(nearest.note.time);
+        }
       }
     }
     showJudge(result, nearest.diffMs);
@@ -1727,6 +1734,7 @@
     setMarkerMode: function (on) { SETTINGS.markerAttackMode = !!on; },
     tapNote: function (event) { attack(event); }, // 防御: レーン内どこでもタップ→ノーツ判定
     setBars: function (n) { if (Number.isFinite(n) && n > 0) SETTINGS.bars = n; },
+    setDefenseMode: function (on) { SETTINGS.defenseNoEnemyDamage = !!on; },
     getBars: function () { return SETTINGS.bars; },
     judgeBeatTap: function (event) {
       if (!state.running || state.countingIn) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };

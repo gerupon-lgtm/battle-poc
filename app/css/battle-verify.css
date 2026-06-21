@@ -62,11 +62,14 @@ body {
 /* --- クイズ --- */
 .bv-quiz-category { font-size: 12px; color: var(--bv-accent); margin: 0 0 6px; }
 .bv-quiz-q { font-size: 18px; line-height: 1.6; white-space: pre-line; margin: 0 0 16px; }
-.bv-choices { display: grid; gap: 10px; }
+.bv-choices { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
 .bv-choice {
+  display: block; width: 100%; flex: 0 0 auto;
   text-align: left; padding: 13px 14px; border-radius: 10px; cursor: pointer;
   border: 1px solid #38415c; background: var(--bv-panel2); color: var(--bv-text);
-  font-size: 15px;
+  font-size: 15px; line-height: 1.5;
+  white-space: normal; overflow-wrap: anywhere; word-break: break-word;
+  height: auto; min-height: 0;
 }
 .bv-choice:hover:not(:disabled) { border-color: var(--bv-accent); }
 .bv-choice.correct { background: rgba(76,210,138,.2); border-color: var(--bv-good); }

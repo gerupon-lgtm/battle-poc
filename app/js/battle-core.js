@@ -71,7 +71,7 @@
   //   時間切れ(未クリア)なら同じパターンで再戦。ブレイク技巧クリア後はランダム。
   const PATTERN_ORDER = ["basic", "offbeat", "technical", "sparse", "jazzBreak"];
   // 弱点マーカーのヒット半径(px)。落下アイコン相当(約22px四方)に少し余裕。
-  const WEAKPOINT_HIT_RADIUS_PX = 16;
+  const WEAKPOINT_HIT_RADIUS_PX = 30;
 
   // リズムのレーン(#lane)の最背面に敵キャラ画像を敷く。
   // 落下物(.notes)はキャラの上、バー(.hit-line)・ゲージ(.beat-guide)は前面に重なる(CSSのz-index)。
@@ -209,6 +209,8 @@
         clearRhythmResult();
         // このラウンドは通常ノーツを使う(攻撃マーカーモードを必ず解除=防御が無反応になるのを防ぐ)
         if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
+        // 弱点案の防御(どこでもタップ)では敵ダメージ/撃破を出さない(終了時に「撃破」を表示しない)
+        if (window.RhythmAttack && window.RhythmAttack.setDefenseMode) window.RhythmAttack.setDefenseMode(!!opts.tapAnywhere);
         if (!opts.skipEnemyBg) setLaneEnemyBackground(state.enemy.image);
         setLanePhase(opts.phase);
         if (opts.phase) showTurnToast(opts.turnLabel || (opts.phase === "attack" ? "攻撃ターン!" : "防御ターン!"), opts.phase);
@@ -303,7 +305,7 @@
             if (lr.width === 0 || ir.width === 0) { requestAnimationFrame(place); return; }
             const cx = (ir.left - lr.left) + uv[0] * ir.width;
             const cy = (ir.top - lr.top) + uv[1] * ir.height;
-            const marker = { u: cx / lr.width, v: cy / lr.height, rPx: WEAKPOINT_HIT_RADIUS_PX };
+            const marker = { u: cx / lr.width, v: cy / lr.height, rPx: visible ? WEAKPOINT_HIT_RADIUS_PX : WEAKPOINT_HIT_RADIUS_PX * 2 };
             let m = document.getElementById("bv-weakpoint");
             if (!m) { m = document.createElement("div"); m.id = "bv-weakpoint"; m.setAttribute("aria-hidden", "true"); lane.appendChild(m); }
             m.style.left = (marker.u * 100) + "%";
@@ -354,6 +356,7 @@
         showStage("rhythm");
         clearRhythmResult();
         if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(true);
+        if (window.RhythmAttack && window.RhythmAttack.setDefenseMode) window.RhythmAttack.setDefenseMode(false);
         const lane = document.getElementById("lane");
         setLanePhase("attack");
         showTurnToast(opts.turnLabel || "攻撃ターン!", "attack");
