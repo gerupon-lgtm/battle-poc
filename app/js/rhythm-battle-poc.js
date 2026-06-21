@@ -19,6 +19,11 @@
     // 開始直後は合成アニメ生成等で主スレッドが混むため、余裕を持たせて
     // カウント拍と振動が詰まって発火する違和感を避ける。
     startLeadSec: 0.5,
+    // 弱点ねらい(マーカー攻撃)モード。true で落下ノーツを出さず、拍タップを外部(フロー)で判定。
+    markerAttackMode: false,
+    // 攻撃の拍タップ判定窓(防御の PERFECT ±80 / GOOD ±180 より厳しめ)。
+    attackPerfectMs: 50,
+    attackGoodMs: 110,
   };
 
   const CALIBRATION_STORAGE_KEY = "rhythmBattleTimingCalibration";
@@ -1423,7 +1428,7 @@
     $("battle-result").hidden = false;
     addLog("時間切れ。敵を撃破できなかった");
     if (window.RhythmBridge && window.RhythmBridge.onRoundEnd) {
-      window.RhythmBridge.onRoundEnd({ score: state.score, combo: state.combo, cleared: false });
+      window.RhythmBridge.onRoundEnd({ score: state.score, combo: state.combo, cleared: false, misses: state.missCount });
     }
   }
 
@@ -1445,6 +1450,8 @@
     state.nextBeat = 0;
     state.defeated = false;
     state.ringOutBeat = Infinity;
+    state.missCount = 0;
+    if (SETTINGS.markerAttackMode) state.chart = []; // 弱点攻撃は落下ノーツを使わない
     state.enemyMaxHp = calculateEnemyMaxHp(state.chart, SETTINGS.clearHpRatio);
     state.enemyHp = state.enemyMaxHp;
     state.combo = 0;
@@ -1525,7 +1532,7 @@
     stopPlayback();
     $("start-btn").disabled = false;
     if (window.RhythmBridge && window.RhythmBridge.onRoundEnd) {
-      window.RhythmBridge.onRoundEnd({ score: state.score, combo: state.combo, cleared: true });
+      window.RhythmBridge.onRoundEnd({ score: state.score, combo: state.combo, cleared: true, misses: state.missCount });
     }
   }
 
@@ -1551,6 +1558,7 @@
     }
     if (result.rank === "miss") {
       state.combo = 0;
+      state.missCount += 1;
       addLog("ミス! 攻撃は空を切った");
     } else {
       const damage = result.damage + (nearest.note.accent ? 6 : 0);
@@ -1593,6 +1601,7 @@
         note.missed = true;
         removeNoteElement(note.id);
         state.combo = 0;
+        state.missCount += 1;
         showJudge({ label: "MISS", rank: "miss", damage: 0 }, until * -1000);
         addLog("ミス! タイミングを逃した");
         updateStats();
@@ -1656,7 +1665,7 @@
       ? calculateVisualSongStartMs(wallSync.perfMs, wallSync.audioSec, state.startTime)
       : calculateVisualSongStartMs(performance.now(), audio.currentTime, state.startTime);
     if (state.compositorVisuals) {
-      prepareCompositorNotes(state.visualSongStartMs);
+      if (!SETTINGS.markerAttackMode) prepareCompositorNotes(state.visualSongStartMs);
       prepareCompositorBeatGuide(state.visualSongStartMs);
       prepareCompositorHitLine(state.visualSongStartMs);
     }
@@ -1711,6 +1720,22 @@
     resetDiagnostics();
     loadCalibration();
   }
+
+  // 弱点ねらい(マーカー攻撃)用: タップの「最寄り四分音符」に対する時間判定を外部へ公開。
+  // 空間判定(弱点位置)はフロー側で行い、これは時間判定のみ(厳しめ窓)を返す。
+  window.RhythmAttack = {
+    setMarkerMode: function (on) { SETTINGS.markerAttackMode = !!on; },
+    judgeBeatTap: function (event) {
+      if (!state.running || state.countingIn) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };
+      const beat = beatSeconds(SETTINGS.bpm);
+      const now = inputSongTime(event);
+      const beatIndex = Math.round(now / beat);
+      if (beatIndex < 0) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };
+      const offsetMs = (now - beatIndex * beat) * 1000;
+      const j = judgeHit(offsetMs, { perfectMs: SETTINGS.attackPerfectMs, goodMs: SETTINGS.attackGoodMs });
+      return { valid: true, rank: j.rank, offsetMs: offsetMs, beatIndex: beatIndex };
+    },
+  };
 
   window.addEventListener("DOMContentLoaded", bind);
 }());

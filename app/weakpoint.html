@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>クイズ→リズム式バトル</title>
+  <title>弱点ねらい式バトル</title>
   <link rel="stylesheet" href="./css/rhythm-battle-poc.css?v=18">
   <link rel="stylesheet" href="./css/battle-verify.css?v=10">
 </head>
 <body>
 <div class="bv-app">
-  <h1 class="bv-title">クイズ→リズム式バトル<span class="badge">トシ案(改)</span></h1>
+  <h1 class="bv-title">弱点ねらい式バトル<span class="badge">弱点案</span></h1>
   <p class="bv-nav"><a href="./index.html">← 方式選択へ戻る</a> ／ 敵: ランダム出現</p>
 
   <header class="bv-header">
@@ -32,14 +32,7 @@
   </header>
 
   <section id="bv-intro" class="bv-stage">
-    <p>クイズに答えてリズムへ。リズムの役割は下で選べます（既定=防御専用）。解説は勝利後にまとめて表示。敵はランダム出現。</p>
-    <div class="bv-mode">
-      <p class="bv-mode-title">リズムの役割を選択:</p>
-      <label class="bv-mode-opt"><input type="radio" name="bv-rhythm-mode" value="defense" checked>
-        <span><strong>防御専用（既定）</strong>：攻撃はクイズ正解で。リズムは自分の被ダメージのみに関与（スコアが高いほど軽減）</span></label>
-      <label class="bv-mode-opt"><input type="radio" name="bv-rhythm-mode" value="attack">
-        <span><strong>攻撃型</strong>：クイズ正解で敵にダメージ → リズムクリアでさらに敵にダメージ／時間切れで被弾</span></label>
-    </div>
+    <p>クイズ→攻撃(弱点ねらい)→防御 を繰り返します。クイズ正解で敵の弱点が可視化＋攻撃力アップ。攻撃ターンは敵の体の弱点を拍に合わせてタップ(判定は防御より厳しめ)。防御ターンは Perfect/Good で受け、Miss で被弾。解説は勝利後にまとめて表示。</p>
     <button id="bv-start" class="bv-btn">戦闘開始</button>
   </section>
 
@@ -104,7 +97,7 @@
           <span class="enemy-face">◆</span>
         </div>
         <div class="enemy-info">
-          <p class="enemy-name">リズムゲージ</p>
+          <p class="enemy-name">ビートスライム</p>
           <div class="hp-line">
             <span>HP</span>
             <div class="hp-bar"><div id="enemy-hp-fill"></div></div>
@@ -174,10 +167,10 @@
   <script src="./js/enemy-loader.js?v=2"></script>
   <script src="./js/quiz-engine.js?v=1"></script>
   <script src="./js/battle-core.js?v=11"></script>
-  <script src="./js/battle-toshi.js?v=8"></script>
+  <script src="./js/battle-weakpoint.js?v=1"></script>
   <script>
     (async function () {
-      const FLOW = window.BattleToshi;
+      const FLOW = window.BattleWeakpoint;
       let enemy, core = null;
       try {
         await EnemyLoader.loadAll();
@@ -187,15 +180,11 @@
           '<p style="color:#ff6b6b">データ読込に失敗しました。ローカルサーバ経由で開いてください(README参照)。<br>' + e.message + '</p>';
         return;
       }
-      // イントロ用にランダムな敵をプレビュー
       enemy = EnemyLoader.random();
       core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
       document.getElementById("bv-start").addEventListener("click", function () {
-        // 表示中(イントロでプレビュー)の敵でそのまま開始。
-        // 新しい敵は「もう一度」(リロード)で抽選される。
         core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
-        var modeEl = document.querySelector('input[name="bv-rhythm-mode"]:checked');
-        FLOW.run(core, { mode: modeEl ? modeEl.value : "defense" });
+        FLOW.run(core);
       });
       document.getElementById("bv-restart").addEventListener("click", function () {
         location.reload();

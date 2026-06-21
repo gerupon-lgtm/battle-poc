@@ -70,6 +70,9 @@
   //   基本→裏拍→技巧→余白→ブレイク技巧 の順。クリアで次へ進み、
   //   時間切れ(未クリア)なら同じパターンで再戦。ブレイク技巧クリア後はランダム。
   const PATTERN_ORDER = ["basic", "offbeat", "technical", "sparse", "jazzBreak"];
+  // 弱点マーカーのヒット半径(px)。落下アイコン相当(約22px四方)に少し余裕。
+  const WEAKPOINT_HIT_RADIUS_PX = 16;
+
   // リズムのレーン(#lane)の最背面に敵キャラ画像を敷く。
   // 落下物(.notes)はキャラの上、バー(.hit-line)・ゲージ(.beat-guide)は前面に重なる(CSSのz-index)。
   function setLaneEnemyBackground(imageUrl) {
@@ -210,6 +213,142 @@
       });
     }
 
+    // 敵画像の不透過部分から弱点座標(レーン比 u,v)をランダムに選び、マーカーを配置する。
+    // visible=true で薄く可視化、false で非表示(ヒット判定は有効)。Promiseで marker を解決。
+    function placeWeakpoint(visible) {
+      return new Promise((resolve) => {
+        const lane = document.getElementById("lane");
+        if (!lane) return resolve(null);
+        let img = document.getElementById("bv-lane-enemy-img");
+        if (!img) {
+          img = document.createElement("img");
+          img.id = "bv-lane-enemy-img";
+          img.alt = "";
+          img.setAttribute("aria-hidden", "true");
+          lane.insertBefore(img, lane.firstChild);
+        }
+        const url = state.enemy.image;
+        const finalize = (uv) => {
+          img.src = url;
+          const place = () => {
+            const lr = lane.getBoundingClientRect();
+            const ir = img.getBoundingClientRect();
+            if (lr.width === 0 || ir.width === 0) { requestAnimationFrame(place); return; }
+            const cx = (ir.left - lr.left) + uv[0] * ir.width;
+            const cy = (ir.top - lr.top) + uv[1] * ir.height;
+            const marker = { u: cx / lr.width, v: cy / lr.height, rPx: WEAKPOINT_HIT_RADIUS_PX };
+            let m = document.getElementById("bv-weakpoint");
+            if (!m) { m = document.createElement("div"); m.id = "bv-weakpoint"; m.setAttribute("aria-hidden", "true"); lane.appendChild(m); }
+            m.style.left = (marker.u * 100) + "%";
+            m.style.top = (marker.v * 100) + "%";
+            m.className = visible ? "visible" : "";
+            resolve(marker);
+          };
+          if (img.complete && img.naturalWidth) place(); else img.onload = place;
+        };
+        // α走査で不透過画素を選ぶ(同一オリジン画像のためcanvas可)。失敗時は中央寄り。
+        const probe = new Image();
+        probe.onload = () => {
+          let uv = [0.5, 0.45];
+          try {
+            const nw = probe.naturalWidth, nh = probe.naturalHeight;
+            const cv = document.createElement("canvas"); cv.width = nw; cv.height = nh;
+            const ctx = cv.getContext("2d"); ctx.drawImage(probe, 0, 0);
+            const data = ctx.getImageData(0, 0, nw, nh).data;
+            const cand = [];
+            const x0 = Math.floor(nw * 0.18), x1 = Math.ceil(nw * 0.82);
+            const y0 = Math.floor(nh * 0.12), y1 = Math.ceil(nh * 0.78);
+            const step = Math.max(1, Math.floor(Math.min(nw, nh) / 40));
+            for (let y = y0; y < y1; y += step) {
+              for (let x = x0; x < x1; x += step) {
+                if (data[(y * nw + x) * 4 + 3] > 160) cand.push([x / nw, y / nh]);
+              }
+            }
+            if (cand.length) uv = cand[Math.floor(Math.random() * cand.length)];
+          } catch (e) { /* α取得不可→中央寄り */ }
+          finalize(uv);
+        };
+        probe.onerror = () => finalize([0.5, 0.45]);
+        probe.src = url;
+      });
+    }
+
+    function clearWeakpoint() {
+      const m = document.getElementById("bv-weakpoint");
+      if (m) m.remove();
+      const img = document.getElementById("bv-lane-enemy-img");
+      if (img) img.remove();
+    }
+
+    // 攻撃ラウンド: 弱点マーカーを置き、拍タイミング×弱点位置の両方を満たすタップを集計する。
+    // 解決値: { perfect, good, hits } と元のリズム結果 r。
+    function runAttackRound(prompt, patternId, opts) {
+      opts = opts || {};
+      return new Promise((resolve) => {
+        showStage("rhythm");
+        clearRhythmResult();
+        if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(true);
+        const lane = document.getElementById("lane");
+        let marker = null;
+        placeWeakpoint(!!opts.visible).then((m) => { marker = m; });
+        const songName = pickRandomSong();
+        const patName = applyPattern(patternId);
+        const startBtn = $("start-btn");
+        if (startBtn) startBtn.disabled = false;
+        const base = prompt || "［戦闘開始］を押し、弱点を拍に合わせてタップ";
+        const extra =
+          (songName ? "（曲: " + songName : "") +
+          (patName ? (songName ? " / タップ: " : "（タップ: ") + patName : "") +
+          (songName || patName ? "）" : "");
+        $("bv-rhythm-prompt").textContent = base + extra;
+
+        const usedBeats = new Set();
+        const tally = { perfect: 0, good: 0 };
+        function flashMarker(rank) {
+          const m = document.getElementById("bv-weakpoint");
+          if (!m) return;
+          m.classList.add("hit-" + rank);
+          setTimeout(() => m.classList.remove("hit-" + rank), 160);
+        }
+        function onLaneTap(ev) {
+          if (!marker) return;
+          if (ev.cancelable) ev.preventDefault();
+          const lr = lane.getBoundingClientRect();
+          const mx = lr.width * marker.u, my = lr.height * marker.v;
+          const tx = ev.clientX - lr.left, ty = ev.clientY - lr.top;
+          if (Math.hypot(tx - mx, ty - my) > marker.rPx) return; // 弱点を外した
+          const j = window.RhythmAttack ? window.RhythmAttack.judgeBeatTap(ev) : { valid: false };
+          if (!j.valid || usedBeats.has(j.beatIndex)) return; // 1拍1回
+          usedBeats.add(j.beatIndex);
+          if (j.rank === "perfect") { tally.perfect += 1; flashMarker("perfect"); }
+          else if (j.rank === "good") { tally.good += 1; flashMarker("good"); }
+          else { flashMarker("miss"); }
+        }
+        lane.addEventListener("pointerdown", onLaneTap);
+
+        let done = false;
+        window.RhythmBridge = {
+          onRoundEnd: (r) => {
+            if (done) return;
+            done = true;
+            window.RhythmBridge.onRoundEnd = null;
+            lane.removeEventListener("pointerdown", onLaneTap);
+            if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
+            if (startBtn) startBtn.disabled = true;
+            const res = $("battle-result"); if (res) { res.hidden = true; res.className = "battle-result"; }
+            $("bv-rhythm-prompt").textContent = "攻撃結果を確認して［次へ］を押してください";
+            const next = $("bv-rhythm-next");
+            next.classList.remove("hidden");
+            next.onclick = () => {
+              next.classList.add("hidden");
+              clearWeakpoint();
+              resolve({ perfect: tally.perfect, good: tally.good, hits: tally.perfect + tally.good, rhythm: r });
+            };
+          },
+        };
+      });
+    }
+
     // クイズを1問表示し、ユーザーの選択を待つ。
     // revealExplanation=true のとき、回答直後に解説を表示する。
     // 解決値: { correct: bool, quiz }
@@ -271,6 +410,9 @@
       result,
       showStage,
       runRhythmRound,
+      runAttackRound,
+      placeWeakpoint,
+      clearWeakpoint,
       showQuiz,
       showFinish,
     };
