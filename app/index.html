@@ -4,22 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>バトル方式 検証</title>
-  <link rel="stylesheet" href="./css/battle-verify.css?v=1">
+  <link rel="stylesheet" href="./css/battle-verify.css?v=6">
 </head>
 <body>
 <div class="bv-app">
   <h1 class="bv-title">バトル方式 検証<span class="badge">PoC</span></h1>
-  <p class="bv-nav">敵: そらドラゴン(固定) / クイズ: はしけん流用 / リズム: 既定曲</p>
+  <p class="bv-nav">敵: ランダム出現(26体) / クイズ: はしけん流用 / リズム: 曲ランダム・タップ順送り</p>
 
   <section class="bv-stage">
     <h2 style="margin-top:0">たんたん案</h2>
-    <p style="color:#9aa3bd;line-height:1.7">リズム→獲得点数で選択肢数→クイズ→正解で敵ダメージ/不正解で自分ダメージ。解説は毎問。</p>
+    <p style="color:#9aa3bd;line-height:1.7">リズム→獲得スコアで選択肢数→クイズ→正解で敵にダメージ(会心あり)/不正解で自分にダメージ。解説はバトル後にまとめて表示。</p>
     <a class="bv-btn" href="./tantan.html">たんたん案を試す</a>
   </section>
 
   <section class="bv-stage">
     <h2 style="margin-top:0">トシ案(改)</h2>
-    <p style="color:#9aa3bd;line-height:1.7">クイズ(2択)正解で守備半減→防御リズム→クリアで攻撃/時間切れで被弾。解説は勝利後にまとめて。</p>
+    <p style="color:#9aa3bd;line-height:1.7">クイズ正解で敵にダメージ。リズムの役割を選択(既定=防御専用:被ダメージ軽減／攻撃型:クリアで追加攻撃・時間切れで被弾)。解説は勝利後にまとめて。</p>
     <a class="bv-btn" href="./toshi.html">トシ案(改)を試す</a>
   </section>
 </div>
