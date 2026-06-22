@@ -237,22 +237,37 @@
           if (startBtn) startBtn.style.display = "none";
           if (attackBtn) attackBtn.style.display = "none";
           $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始" + songInfo;
-          const onFirstTap = (e) => {
-            if (e.cancelable) e.preventDefault();
-            // キャリブレーション中はターンを開始せず、タップをキャリブレーション記録へ回す
+          // キャリブレーション中の精密タップは pointerdown で記録(開始はしない)
+          const onCalibTap = (e) => {
             if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) {
+              if (e.cancelable) e.preventDefault();
               if (window.RhythmAttack.tapNote) window.RhythmAttack.tapNote(e);
-              return;
             }
-            if (lane) lane.removeEventListener("pointerdown", onFirstTap);
+          };
+          // 開始は touchend / click で(iOSは pointerdown では AudioContext を解錠できない)
+          let startInvoked = false;
+          const onStartTap = (e) => {
+            if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) return;
+            if (startInvoked) return; startInvoked = true;
+            if (e && e.cancelable) e.preventDefault();
+            if (lane) {
+              lane.removeEventListener("pointerdown", onCalibTap);
+              lane.removeEventListener("touchend", onStartTap);
+              lane.removeEventListener("click", onStartTap);
+              lane.style.cursor = "";
+            }
             if (startBtn) startBtn.disabled = false;
-            // 実タップ内で直接 start() を呼ぶ(iOSは合成clickだとAudioContextを解錠できないため)
             if (window.RhythmAttack && window.RhythmAttack.startGame) window.RhythmAttack.startGame();
             else if (startBtn) startBtn.click();
             beginPlay();
             $("bv-rhythm-prompt").textContent = base + songInfo;
           };
-          if (lane) lane.addEventListener("pointerdown", onFirstTap);
+          if (lane) {
+            lane.style.cursor = "pointer";
+            lane.addEventListener("pointerdown", onCalibTap);
+            lane.addEventListener("touchend", onStartTap);
+            lane.addEventListener("click", onStartTap);
+          }
         } else {
           if (startBtn) { startBtn.style.display = ""; startBtn.disabled = false; }
           if (opts.tapAnywhere && attackBtn) attackBtn.style.display = "none";
@@ -424,21 +439,35 @@
 
         if (startBtn) startBtn.style.display = "none";
         $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始（弱点を拍でタップ）" + songInfo;
-        const onFirstTap = (e) => {
-          if (e.cancelable) e.preventDefault();
-          // キャリブレーション中はターンを開始せず、タップをキャリブレーション記録へ回す
+        const onCalibTap = (e) => {
           if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) {
+            if (e.cancelable) e.preventDefault();
             if (window.RhythmAttack.tapNote) window.RhythmAttack.tapNote(e);
-            return;
           }
-          if (lane) lane.removeEventListener("pointerdown", onFirstTap);
+        };
+        let startInvoked = false;
+        const onStartTap = (e) => {
+          if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) return;
+          if (startInvoked) return; startInvoked = true;
+          if (e && e.cancelable) e.preventDefault();
+          if (lane) {
+            lane.removeEventListener("pointerdown", onCalibTap);
+            lane.removeEventListener("touchend", onStartTap);
+            lane.removeEventListener("click", onStartTap);
+            lane.style.cursor = "";
+          }
           if (startBtn) startBtn.disabled = false;
           if (window.RhythmAttack && window.RhythmAttack.startGame) window.RhythmAttack.startGame();
           else if (startBtn) startBtn.click();
           beginPlay();
           updatePrompt();
         };
-        if (lane) lane.addEventListener("pointerdown", onFirstTap);
+        if (lane) {
+          lane.style.cursor = "pointer";
+          lane.addEventListener("pointerdown", onCalibTap);
+          lane.addEventListener("touchend", onStartTap);
+          lane.addEventListener("click", onStartTap);
+        }
 
         let done = false;
         window.RhythmBridge = {
