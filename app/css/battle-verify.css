@@ -401,3 +401,12 @@ body.page-weakpoint:not([data-stage="rhythm"]) .calibration-btn { display: none 
   100% { opacity: 0; transform: translateX(-50%) scale(1); }
 }
 @media (max-width: 560px) { #bv-attack-judge { top: 80px; font-size: 18px; } }
+
+/* キャリブレーション画面を最前面に。レーン内のヒント/判定表示より前に出す */
+.calibration-panel { z-index: 9200; }
+/* キャリブレーション中は攻撃ヒント/判定トーストを隠して紛らわしさを避ける(:has 非対応環境では上の z-index で背面化) */
+.lane:has(.calibration-panel:not([hidden])) #bv-attack-hint,
+.lane:has(.calibration-panel:not([hidden])) #bv-attack-judge { display: none !important; }
+
+/* プレイ中のキャリブレーションボタンは無効表示 */
+body.page-weakpoint .calibration-btn:disabled { opacity: .4; pointer-events: none; cursor: default; }

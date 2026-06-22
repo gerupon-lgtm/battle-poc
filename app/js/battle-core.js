@@ -229,6 +229,7 @@
         let started = false;
         function beginPlay() {
           if (started) return; started = true;
+          const cal = $("calibration-btn"); if (cal) cal.disabled = true; // プレイ中はキャリブレーション不可
           if (opts.tapAnywhere && lane) lane.addEventListener("pointerdown", laneDefend);
         }
 
@@ -263,6 +264,7 @@
             done = true;
             window.RhythmBridge.onRoundEnd = null;
             if (lane) lane.removeEventListener("pointerdown", laneDefend);
+            const calBtnR = $("calibration-btn"); if (calBtnR) calBtnR.disabled = false; // ターン終了で再有効化
             if (startBtn) startBtn.disabled = true;
             if (opts.turnLabel) {
               const title = $("battle-result-title"); if (title) title.textContent = opts.turnLabel + "終了";
@@ -416,7 +418,7 @@
           else { floatHit("miss", "タイミング×"); }
         }
         let started = false;
-        function beginPlay() { if (started) return; started = true; if (lane) lane.addEventListener("pointerdown", onLaneTap); }
+        function beginPlay() { if (started) return; started = true; const cal = $("calibration-btn"); if (cal) cal.disabled = true; if (lane) lane.addEventListener("pointerdown", onLaneTap); }
 
         if (startBtn) startBtn.style.display = "none";
         $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始（弱点を拍でタップ）" + songInfo;
@@ -443,6 +445,7 @@
             if (lane) { lane.removeEventListener("pointerdown", onLaneTap); lane.removeEventListener("pointerdown", onFirstTap); }
             const ah = document.getElementById("bv-attack-hint"); if (ah) ah.remove();
             const aj = document.getElementById("bv-attack-judge"); if (aj) aj.remove();
+            const calBtnA = $("calibration-btn"); if (calBtnA) calBtnA.disabled = false; // ターン終了で再有効化
             if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
             if (startBtn) startBtn.disabled = true;
             const title = $("battle-result-title"); if (title) title.textContent = "攻撃ターン終了";
