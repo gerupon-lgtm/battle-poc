@@ -1777,6 +1777,13 @@
     setBars: function (n) { if (Number.isFinite(n) && n > 0) SETTINGS.bars = n; },
     setDefenseMode: function (on) { SETTINGS.defenseNoEnemyDamage = !!on; },
     isCalibrating: function () { return !!state.calibrating; },
+    // 一時停止用: 演奏を静かに停止(時間切れ/撃破表示やonRoundEndは出さない)。
+    abort: function () {
+      stopPlayback();
+      clearVisualNotes();
+      try { var br = document.getElementById("battle-result"); if (br) { br.hidden = true; br.className = "battle-result"; } } catch (_) {}
+      try { var jd = document.getElementById("judge"); if (jd) { jd.textContent = ""; jd.className = "judge"; } } catch (_) {}
+    },
     setHapticBeatGuide: function (on) { SETTINGS.hapticBeatGuide = !!on; },
     setHapticTap: function (on) { SETTINGS.hapticTapEnabled = !!on; },
     // 画面タップ開始用: 実際のタップ(ユーザー操作)内で直接 start() を呼ぶ。

@@ -372,20 +372,26 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
   100% { opacity: 0; transform: translate(-50%, -120%) scale(1); }
 }
 
-/* 弱点案: キャリブレーション(タイミング調整)ボタンをレーンに隠れない最前面・押しやすい位置へ */
-body.page-weakpoint[data-stage="rhythm"] .calibration-btn {
-  position: fixed;
-  top: 8px; right: 8px; bottom: auto; left: auto;
-  z-index: 9500;
-  min-height: 40px; padding: 9px 15px; font-size: 13px;
-  pointer-events: auto;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+/* 弱点案: 画面下部(meter-card)のボタン(キャリブレーション/一時停止)。
+   レーン(プレイのタップ領域)の外に置き、誤タップを避ける。 */
+body.page-weakpoint .meter-card { gap: 8px; flex-wrap: wrap; }
+body.page-weakpoint .bv-meter-btn {
+  position: static !important;   /* .calibration-btn の絶対配置を無効化 */
+  inset: auto !important;
+  appearance: none;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.28);
+  background: var(--bv-panel2);
+  color: var(--bv-text);
+  font-weight: 800; font-size: 13px;
+  min-height: 40px; padding: 8px 14px;
+  width: auto;
+  cursor: pointer;
 }
-@media (max-width: 560px) {
-  body.page-weakpoint[data-stage="rhythm"] .calibration-btn { min-height: 36px; padding: 7px 12px; font-size: 12px; }
+body.page-weakpoint .bv-meter-btn.bv-pause {
+  background: #2a3550; border-color: rgba(110,168,255,0.5); color: #cfe0ff;
 }
-/* リズム以外のステージ(クイズ/結果)では隠す(body直下に移設したため) */
-body.page-weakpoint:not([data-stage="rhythm"]) .calibration-btn { display: none !important; }
+body.page-weakpoint .bv-meter-btn:active { filter: brightness(1.15); }
 
 /* 攻撃の判定テキスト(ヒント直下の固定位置。弱点位置を晒さない) */
 #bv-attack-judge {
@@ -413,4 +419,27 @@ body.page-weakpoint:not([data-stage="rhythm"]) .calibration-btn { display: none 
 .lane:has(.calibration-panel:not([hidden])) #bv-attack-judge { display: none !important; }
 
 /* プレイ中のキャリブレーションボタンは無効表示 */
-body.page-weakpoint .calibration-btn:disabled { opacity: .4; pointer-events: none; cursor: default; }
+body.page-weakpoint .calibration-btn:disabled,
+body.page-weakpoint .bv-meter-btn:disabled { opacity: .4; pointer-events: none; cursor: default; }
+
+/* 一時停止メニュー(最前面のモーダル) */
+#bv-pause-overlay {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(2,6,23,0.72);
+}
+#bv-pause-overlay[hidden] { display: none; }
+#bv-pause-overlay .bv-pause-box {
+  background: var(--bv-panel); border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 14px; padding: 22px; width: min(86vw, 360px);
+  display: flex; flex-direction: column; gap: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+#bv-pause-overlay .bv-pause-title { margin: 0 0 4px; font-size: 18px; font-weight: 900; text-align: center; }
+#bv-pause-overlay .bv-pause-opt {
+  appearance: none; border: 1px solid #38415c; border-radius: 10px;
+  background: var(--bv-panel2); color: var(--bv-text);
+  font-weight: 800; font-size: 15px; padding: 14px 16px; cursor: pointer; text-align: left;
+}
+#bv-pause-overlay .bv-pause-opt:active { filter: brightness(1.15); }
+#bv-pause-overlay .bv-pause-opt.danger { border-color: rgba(255,107,107,0.6); color: #ffb4b4; }

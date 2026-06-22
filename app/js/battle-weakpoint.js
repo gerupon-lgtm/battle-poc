@@ -7,6 +7,8 @@
 //   4. 防御ターン: 従来リズム。Perfect/Good=防御成功(無傷)、Miss=被弾。
 //   5. どちらかの HP が 0 になるまで 1〜4 を繰り返す。
 //   6. 結果＋解説(勝利時にまとめて)。
+// 一時停止: プレイ中は画面下部の「一時停止」で中断でき、再開(このターンを最初から)/
+//   直前のクイズから/やめる(戦闘開始前へ) を選べる。
 // ※会議前の検証PoC(合意仕様ではない / 50_design §2 のたんたん提案を具体化)。
 // =====================================================
 (function () {
@@ -16,20 +18,58 @@
     // 攻撃: 正規化方式 = 最大火力 × 成功割合 × バフ
     //   frac = (PERFECT×1 + GOOD×GOOD_WEIGHT) / 総拍数(4小節=16)
     //   dmg  = round(ATTACK_MAX_PER_TURN × frac × (正解?QUIZ_BUFF_MULT:1))
-    // 小節数・判定窓を変えてもダメージが安定し、1ターン最大火力を先に決められる。
     ATTACK_MAX_PER_TURN: 25,    // 1ターンの基礎最大ダメージ(バフ無し・全PERFECT)
     GOOD_WEIGHT: 0.5,           // GOODの寄与(PERFECT=1.0基準)
     QUIZ_BUFF_MULT: 1.5,        // クイズ正解時の攻撃バフ
     // 防御: Miss1回あたりの被ダメージ
     DEFENSE_MISS_DAMAGE: 8,
     // ▼振動設定(Android のみ。iOS は現状 Web から振動不可)
-    //   2種類の振動をそれぞれ ON/OFF できる。既定はタップ振動のみ。
     HAPTIC_TAP: true,          // タップ時に振動する
     HAPTIC_BEAT_GUIDE: false,  // 拍(メトロノーム)ごとに振動する
   };
 
   function escapeHtml(s) {
     return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // 画面下部(meter-card)のコンボ/スコアを隠し、キャリブレーションと一時停止ボタンを配置する。
+  // どちらもレーン(プレイのタップ領域)の外＝誤タップしにくい位置。
+  function setupControls(core) {
+    const meter = document.querySelector(".meter-card");
+    if (!meter) return;
+    const combo = document.getElementById("combo");
+    const score = document.getElementById("score");
+    if (combo && combo.closest("div")) combo.closest("div").style.display = "none";
+    if (score && score.closest("div")) score.closest("div").style.display = "none";
+    const calBtn = document.getElementById("calibration-btn");
+    if (calBtn) { calBtn.classList.add("bv-meter-btn"); meter.appendChild(calBtn); }
+    let pauseBtn = document.getElementById("bv-pause-btn");
+    if (!pauseBtn) {
+      pauseBtn = document.createElement("button");
+      pauseBtn.id = "bv-pause-btn";
+      pauseBtn.type = "button";
+      pauseBtn.className = "bv-meter-btn bv-pause";
+      pauseBtn.textContent = "⏸ 一時停止";
+      pauseBtn.disabled = true; // プレイ中のみ有効(エンジン側で制御)
+      pauseBtn.addEventListener("click", () => { if (core.requestPause) core.requestPause(); });
+      meter.appendChild(pauseBtn);
+    }
+  }
+
+  // 一時停止に対応してラウンドを実行する。
+  //   "resume"   = このターンを最初からやり直す(再実行)
+  //   それ以外    = 通常結果 / {paused:"restart"|"quit"} を返す
+  async function playWithPause(makeRound) {
+    while (true) {
+      const r = await makeRound();
+      if (r && r.paused === "resume") continue;
+      return r;
+    }
+  }
+
+  // このPoCでは「やめる」で戦闘開始前の画面に戻る(リロード)。
+  function quitToField() {
+    location.reload();
   }
 
   async function run(core) {
@@ -41,9 +81,8 @@
     // 2種類の振動を設定で個別に切替(Android)
     if (window.RhythmAttack && window.RhythmAttack.setHapticTap) window.RhythmAttack.setHapticTap(CONFIG.HAPTIC_TAP);
     if (window.RhythmAttack && window.RhythmAttack.setHapticBeatGuide) window.RhythmAttack.setHapticBeatGuide(CONFIG.HAPTIC_BEAT_GUIDE);
-    // キャリブレーションボタンをbody直下へ移し、レーンに隠れず最前面で操作できるようにする
-    const calBtn = document.getElementById("calibration-btn");
-    if (calBtn && calBtn.parentNode !== document.body) document.body.appendChild(calBtn);
+    // 画面下部にキャリブレーション/一時停止ボタンを配置
+    setupControls(core);
 
     while (!core.isOver()) {
       // 1. クイズ(毎サイクル)。正解で弱点可視化＋攻撃バフ。
@@ -58,13 +97,15 @@
       );
 
       // 2〜3. 攻撃ターン(弱点ねらい)
-      const atk = await core.runAttackRound(
-        buffed
-          ? "攻撃: 光る弱点を拍に合わせてタップ!"
-          : "攻撃: 弱点は非表示。位置を探して拍に合わせてタップ",
-        null,
-        { visible: buffed, turnLabel: "攻撃ターン" }
+      const atkPrompt = buffed
+        ? "攻撃: 光る弱点を拍に合わせてタップ!"
+        : "攻撃: 弱点は非表示。位置を探して拍に合わせてタップ";
+      const atk = await playWithPause(() =>
+        core.runAttackRound(atkPrompt, null, { visible: buffed, turnLabel: "攻撃ターン" })
       );
+      if (atk && atk.paused === "quit") return quitToField();
+      if (atk && atk.paused === "restart") continue; // 直前のクイズから(HP保持)
+
       const mult = buffed ? CONFIG.QUIZ_BUFF_MULT : 1;
       const totalBeats = (window.RhythmAttack && window.RhythmAttack.getBars)
         ? window.RhythmAttack.getBars() * 4 : 16; // 4小節×4拍=総ノート(拍)数
@@ -83,12 +124,18 @@
       }
       if (core.isOver()) break;
 
-      // 4. 防御ターン(従来リズム)。Miss で被弾。
-      const def = await core.runRhythmRound(
-        "防御: 画面のどこでもタップで受ける(Perfect/Good=防御, Miss=被弾)",
-        patSeq.next(),
-        { phase: "defense", skipEnemyBg: true, tapToStart: true, tapAnywhere: true, turnLabel: "防御ターン" }
+      // 4. 防御ターン(従来リズム)。Miss で被弾。パターンは1サイクル1回確定。
+      const defPattern = patSeq.next();
+      const def = await playWithPause(() =>
+        core.runRhythmRound(
+          "防御: 画面のどこでもタップで受ける(Perfect/Good=防御, Miss=被弾)",
+          defPattern,
+          { phase: "defense", skipEnemyBg: true, tapToStart: true, tapAnywhere: true, turnLabel: "防御ターン" }
+        )
       );
+      if (def && def.paused === "quit") return quitToField();
+      if (def && def.paused === "restart") continue; // 直前のクイズから(HP保持)
+
       // 弱点案の防御は時間切れの概念が無いため常にクリア扱い=タップパターンを順送りする
       patSeq.update(true);
       const misses = def.misses || 0;

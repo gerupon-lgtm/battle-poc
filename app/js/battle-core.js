@@ -202,6 +202,40 @@
     // リズムラウンド。opts(任意): phase("attack"/"defense"=トースト+背景色), skipEnemyBg,
     //   tapToStart(画面タップで開始/開始ボタン非表示), tapAnywhere(レーン内どこでもタップ=防御),
     //   turnLabel(終了表示など)。opts無しは従来動作(tantan/toshi)。
+    // 一時停止: 現在のラウンドを静かに中断し、メニュー結果を {paused:action} で返す。
+    function requestPause() {
+      if (window.RhythmBridge && typeof window.RhythmBridge.onRoundEnd === "function") {
+        if (window.RhythmAttack && window.RhythmAttack.abort) window.RhythmAttack.abort();
+        window.RhythmBridge.onRoundEnd({ paused: true });
+      }
+    }
+    function showPauseMenu() {
+      return new Promise((resolve) => {
+        let ov = document.getElementById("bv-pause-overlay");
+        if (!ov) {
+          ov = document.createElement("div");
+          ov.id = "bv-pause-overlay";
+          ov.innerHTML =
+            '<div class="bv-pause-box">' +
+            '<p class="bv-pause-title">一時停止</p>' +
+            '<button type="button" data-act="resume" class="bv-pause-opt">▶ 再開（このターンを最初から）</button>' +
+            '<button type="button" data-act="restart" class="bv-pause-opt">↺ 直前のクイズから</button>' +
+            '<button type="button" data-act="quit" class="bv-pause-opt danger">✕ やめる（戦闘開始前へ）</button>' +
+            '</div>';
+          document.body.appendChild(ov);
+        }
+        ov.hidden = false;
+        const onClick = (e) => {
+          const b = e.target.closest && e.target.closest("[data-act]");
+          if (!b) return;
+          ov.hidden = true;
+          ov.removeEventListener("click", onClick);
+          resolve(b.getAttribute("data-act"));
+        };
+        ov.addEventListener("click", onClick);
+      });
+    }
+
     function runRhythmRound(prompt, patternId, opts) {
       opts = opts || {};
       return new Promise((resolve) => {
@@ -230,6 +264,7 @@
         function beginPlay() {
           if (started) return; started = true;
           const cal = $("calibration-btn"); if (cal) cal.disabled = true; // プレイ中はキャリブレーション不可
+          const pb = $("bv-pause-btn"); if (pb) pb.disabled = false; // プレイ中は一時停止可
           if (opts.tapAnywhere && lane) lane.addEventListener("pointerdown", laneDefend);
         }
 
@@ -247,7 +282,7 @@
           // 開始は touchend / click で(iOSは pointerdown では AudioContext を解錠できない)
           let startInvoked = false;
           const onStartTap = (e) => {
-            if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) return;
+            if ((window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) || (function(){var p=document.getElementById("calibration-panel");return p && !p.hidden;})()) return; // 調整中・完了表示中は開始しない
             if (startInvoked) return; startInvoked = true;
             if (e && e.cancelable) e.preventDefault();
             if (lane) {
@@ -282,7 +317,9 @@
             window.RhythmBridge.onRoundEnd = null;
             if (lane) lane.removeEventListener("pointerdown", laneDefend);
             const calBtnR = $("calibration-btn"); if (calBtnR) calBtnR.disabled = false; // ターン終了で再有効化
+            const pbR = $("bv-pause-btn"); if (pbR) pbR.disabled = true;
             if (startBtn) startBtn.disabled = true;
+            if (r && r.paused) { setLanePhase(""); showPauseMenu().then((act) => resolve({ paused: act })); return; }
             if (opts.turnLabel) {
               const title = $("battle-result-title"); if (title) title.textContent = opts.turnLabel + "終了";
               const detail = $("battle-result-detail"); if (detail) detail.textContent = "";
@@ -435,7 +472,7 @@
           else { floatHit("miss", "タイミング×"); }
         }
         let started = false;
-        function beginPlay() { if (started) return; started = true; const cal = $("calibration-btn"); if (cal) cal.disabled = true; if (lane) lane.addEventListener("pointerdown", onLaneTap); }
+        function beginPlay() { if (started) return; started = true; const cal = $("calibration-btn"); if (cal) cal.disabled = true; const pb = $("bv-pause-btn"); if (pb) pb.disabled = false; if (lane) lane.addEventListener("pointerdown", onLaneTap); }
 
         if (startBtn) startBtn.style.display = "none";
         $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始（弱点を拍でタップ）" + songInfo;
@@ -447,7 +484,7 @@
         };
         let startInvoked = false;
         const onStartTap = (e) => {
-          if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) return;
+          if ((window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) || (function(){var p=document.getElementById("calibration-panel");return p && !p.hidden;})()) return; // 調整中・完了表示中は開始しない
           if (startInvoked) return; startInvoked = true;
           if (e && e.cancelable) e.preventDefault();
           if (lane) {
@@ -485,7 +522,9 @@
             const aj = document.getElementById("bv-attack-judge"); if (aj) aj.remove();
             const calBtnA = $("calibration-btn"); if (calBtnA) calBtnA.disabled = false; // ターン終了で再有効化
             if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
+            const pbA = $("bv-pause-btn"); if (pbA) pbA.disabled = true;
             if (startBtn) startBtn.disabled = true;
+            if (r && r.paused) { setLanePhase(""); showPauseMenu().then((act) => resolve({ paused: act })); return; }
             const title = $("battle-result-title"); if (title) title.textContent = "攻撃ターン終了";
             const detail = $("battle-result-detail"); if (detail) detail.textContent = "PERFECT " + tally.perfect + " / GOOD " + tally.good;
             const res = $("battle-result"); if (res) { res.hidden = false; res.className = "battle-result"; }
@@ -569,6 +608,7 @@
       runRhythmRound,
       runAttackRound,
       toast: showTurnToast,
+      requestPause,
       placeWeakpoint,
       clearWeakpoint,
       showQuiz,
