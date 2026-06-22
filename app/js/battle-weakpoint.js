@@ -79,7 +79,8 @@
         patSeq.next(),
         { phase: "defense", skipEnemyBg: true, tapToStart: true, tapAnywhere: true, turnLabel: "防御ターン" }
       );
-      patSeq.update(def.cleared);
+      // 弱点案の防御は時間切れの概念が無いため常にクリア扱い=タップパターンを順送りする
+      patSeq.update(true);
       const misses = def.misses || 0;
       if (misses > 0) {
         const d = misses * CONFIG.DEFENSE_MISS_DAMAGE;

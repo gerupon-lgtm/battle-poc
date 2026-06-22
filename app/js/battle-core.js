@@ -362,6 +362,13 @@
         showTurnToast(opts.turnLabel || "攻撃ターン!", "attack");
         let marker = null;
         placeWeakpoint(!!opts.visible).then((m) => { marker = m; });
+        // 操作ヒント(カウント中から表示。中央のカウントに被らないレーン上部)
+        let hint = document.getElementById("bv-attack-hint");
+        if (!hint) { hint = document.createElement("div"); hint.id = "bv-attack-hint"; hint.setAttribute("aria-hidden", "true"); }
+        if (lane && hint.parentNode !== lane) lane.appendChild(hint);
+        hint.innerHTML = opts.visible
+          ? '<span class="bv-hint-dot"></span><span>光る弱点をタップ！</span>'
+          : '<span>弱点をさがしてタップ！</span>';
         const songName = pickRandomSong();
         const patName = applyPattern(patternId);
         const songInfo = songInfoLabel(songName, patName);
@@ -391,12 +398,13 @@
         function onLaneTap(ev) {
           if (!marker) return;
           if (ev.cancelable) ev.preventDefault();
+          // カウントイン中・開始前は一切受け付けない/表示しない(防御ターンと同じ。先頭タップ直前から受付)
+          const j = window.RhythmAttack ? window.RhythmAttack.judgeBeatTap(ev) : { valid: false };
+          if (!j.valid) return;
           const lr = lane.getBoundingClientRect();
           const mx = lr.width * marker.u, my = lr.height * marker.v;
           const within = Math.hypot((ev.clientX - lr.left) - mx, (ev.clientY - lr.top) - my) <= marker.rPx;
-          const j = window.RhythmAttack ? window.RhythmAttack.judgeBeatTap(ev) : { valid: false };
           if (!within) { floatHit("miss", "位置×"); return; } // 弱点を外した(空間)
-          if (!j.valid) return;
           if (usedBeats.has(j.beatIndex)) return; // 1拍1回
           usedBeats.add(j.beatIndex);
           if (j.rank === "perfect") { tally.perfect += 1; floatHit("perfect", "PERFECT"); updatePrompt(); }
@@ -424,6 +432,7 @@
             done = true;
             window.RhythmBridge.onRoundEnd = null;
             if (lane) { lane.removeEventListener("pointerdown", onLaneTap); lane.removeEventListener("pointerdown", onFirstTap); }
+            const ah = document.getElementById("bv-attack-hint"); if (ah) ah.remove();
             if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
             if (startBtn) startBtn.disabled = true;
             const title = $("battle-result-title"); if (title) title.textContent = "攻撃ターン終了";
