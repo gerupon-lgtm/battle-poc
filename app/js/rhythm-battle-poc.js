@@ -26,6 +26,10 @@
     attackGoodMs: 110,
     // 防御モード(弱点案): タップ判定は行うが敵ダメージ/撃破は発生させない(防御ターンで「撃破」を出さない)。
     defenseNoEnemyDamage: false,
+    // ビート(メトロノーム)振動を出すか。tap振動とは独立。弱点案では設定ファイルで切替可。
+    hapticBeatGuide: true,
+    // タップ時振動の長さ(ms)。Android=Vibration API / iOS=スイッチ要素のハプティック。
+    hapticTapMs: 12,
   };
 
   const CALIBRATION_STORAGE_KEY = "rhythmBattleTimingCalibration";
@@ -758,7 +762,39 @@
     }
   }
 
+  // タップ時のハプティック(操作感)。トグル無し・常時ON。
+  //  - Android等: Vibration API (navigator.vibrate)。
+  //  - iOS: Vibration API 非対応のため、<input switch> をユーザー操作内でトグルして
+  //    OS のスイッチ・ハプティックを誘発する(端末/iOSバージョンにより不発の場合あり=ベストエフォート)。
+  let iosHapticLabel = null;
+  function ensureIosHaptic() {
+    if (iosHapticLabel) return iosHapticLabel;
+    try {
+      const sw = document.createElement("input");
+      sw.type = "checkbox"; sw.id = "ios-haptic-switch"; sw.setAttribute("switch", "");
+      sw.setAttribute("aria-hidden", "true"); sw.tabIndex = -1;
+      sw.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;";
+      const lbl = document.createElement("label");
+      lbl.id = "ios-haptic-label"; lbl.htmlFor = "ios-haptic-switch";
+      lbl.setAttribute("aria-hidden", "true");
+      lbl.style.cssText = "position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;";
+      document.body.appendChild(sw); document.body.appendChild(lbl);
+      iosHapticLabel = lbl;
+    } catch (_) { iosHapticLabel = null; }
+    return iosHapticLabel;
+  }
+  function hapticTapFeedback() {
+    // 標準 Vibration API(Android等)
+    if (supportsVibration(window.navigator)) {
+      try { navigator.vibrate(SETTINGS.hapticTapMs); } catch (_) { /* 任意機能 */ }
+    } else {
+      // iOS: スイッチ要素のトグルでハプティックを誘発(必ずユーザー操作内で呼ぶ)
+      try { const lbl = ensureIosHaptic(); if (lbl) lbl.click(); } catch (_) { /* 任意機能 */ }
+    }
+  }
+
   function scheduleHaptic(audioTime) {
+    if (!SETTINGS.hapticBeatGuide) return false;
     if (!state.hapticEnabled || !supportsVibration(window.navigator)) return false;
     const delayMs = calculateHapticDelayMs(audioTime, state.audio.currentTime);
     if (delayMs === null) return false;
@@ -785,6 +821,7 @@
   // 拍の視覚発光は performance.now 基準の state.visualSongStartMs + 拍×beatMs で発生するため、
   // 音声時計ではなく同じ壁時計で予約し、見た目の拍と振動を一致させる(Androidの違和感対策)。
   function scheduleHapticVisual(targetWallMs, maxLateMs = 80) {
+    if (!SETTINGS.hapticBeatGuide) return false;
     if (!state.hapticEnabled || !supportsVibration(window.navigator)) return false;
     if (!Number.isFinite(targetWallMs)) return false;
     const delayMs = targetWallMs - performance.now();
@@ -1550,6 +1587,7 @@
       return;
     }
     if (state.defeated) return; // 撃破後はリングアウト中。入力は受け付けない。
+    hapticTapFeedback(); // タップ時振動(操作感・常時ON)
     const nearest = findNearestNote(inputSongTime(event));
     if (!nearest) return;
     const result = judgeHit(nearest.diffMs, SETTINGS);
@@ -1736,9 +1774,11 @@
     setBars: function (n) { if (Number.isFinite(n) && n > 0) SETTINGS.bars = n; },
     setDefenseMode: function (on) { SETTINGS.defenseNoEnemyDamage = !!on; },
     isCalibrating: function () { return !!state.calibrating; },
+    setHapticBeatGuide: function (on) { SETTINGS.hapticBeatGuide = !!on; },
     getBars: function () { return SETTINGS.bars; },
     judgeBeatTap: function (event) {
       if (!state.running || state.countingIn) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };
+      hapticTapFeedback(); // タップ時振動(操作感・常時ON)
       const beat = beatSeconds(SETTINGS.bpm);
       const now = inputSongTime(event);
       const beatIndex = Math.round(now / beat);

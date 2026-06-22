@@ -22,6 +22,11 @@
     QUIZ_BUFF_MULT: 1.5,        // クイズ正解時の攻撃バフ
     // 防御: Miss1回あたりの被ダメージ
     DEFENSE_MISS_DAMAGE: 8,
+    // ▼振動設定(操作感の検証用)
+    //   タップ時振動は常時ON(Android=Vibration API / iOS=スイッチ・ハプティック)。
+    //   下はビート(メトロノーム)振動を併用するかの切替。
+    //   false = タップ振動のみ / true = タップ振動＋ビート振動(主にAndroid)。
+    HAPTIC_BEAT_GUIDE: false,
   };
 
   function escapeHtml(s) {
@@ -34,6 +39,8 @@
     const patSeq = window.BattleCore.createPatternSequencer();
     // 弱点案は短めの4小節で1ターンとする(エンジンは各ページ独立インスタンスのため他案に影響なし)
     if (window.RhythmAttack && window.RhythmAttack.setBars) window.RhythmAttack.setBars(4);
+    // ビート振動の有無を設定で切替(タップ振動は常時ON)
+    if (window.RhythmAttack && window.RhythmAttack.setHapticBeatGuide) window.RhythmAttack.setHapticBeatGuide(CONFIG.HAPTIC_BEAT_GUIDE);
     // キャリブレーションボタンをbody直下へ移し、レーンに隠れず最前面で操作できるようにする
     const calBtn = document.getElementById("calibration-btn");
     if (calBtn && calBtn.parentNode !== document.body) document.body.appendChild(calBtn);

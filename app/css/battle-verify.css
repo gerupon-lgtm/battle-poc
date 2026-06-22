@@ -272,9 +272,13 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
 }
 #bv-weakpoint.visible {
   opacity: 1;
-  background: radial-gradient(circle, rgba(255,40,40,0.92), rgba(255,40,40,0.55) 58%, rgba(255,40,40,0.18) 75%, transparent 82%);
-  box-shadow: 0 0 16px rgba(255,40,40,0.8);
-  border: 2px solid rgba(255,140,140,0.95);
+  background: radial-gradient(circle, rgba(255,40,40,0.97), rgba(255,40,40,0.6) 55%, rgba(255,40,40,0.15) 73%, transparent 80%);
+  /* どんな色のキャラ上でも視認できるよう、白フチ＋外側に黒フチ(＋黒のにじみ)で縁取る */
+  border: 2px solid #ffffff;
+  box-shadow:
+    0 0 0 4px rgba(0,0,0,0.9),
+    0 0 8px 4px rgba(0,0,0,0.55),
+    0 0 14px rgba(255,40,40,0.7);
   animation: bv-weak-pulse 1.1s ease-in-out infinite;
 }
 #bv-weakpoint.hit-perfect { opacity: 1; background: radial-gradient(circle, rgba(250,204,21,0.9), transparent 70%); }
@@ -299,9 +303,9 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
 }
 #bv-attack-hint .bv-hint-dot {
   width: 16px; height: 16px; border-radius: 50%; display: inline-block; flex: 0 0 auto;
-  background: radial-gradient(circle, rgba(255,40,40,0.95), rgba(255,40,40,0.5) 60%, transparent 78%);
-  box-shadow: 0 0 10px rgba(255,40,40,0.85);
-  border: 2px solid rgba(255,140,140,0.95);
+  background: radial-gradient(circle, rgba(255,40,40,0.97), rgba(255,40,40,0.55) 58%, transparent 78%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.9), 0 0 8px rgba(255,40,40,0.8);
 }
 @keyframes bv-hint-pulse { 0%, 100% { opacity: .85; } 50% { opacity: 1; } }
 @media (max-width: 560px) {
