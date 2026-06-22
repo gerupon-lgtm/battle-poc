@@ -475,7 +475,12 @@
             if (done) return;
             done = true;
             window.RhythmBridge.onRoundEnd = null;
-            if (lane) { lane.removeEventListener("pointerdown", onLaneTap); lane.removeEventListener("pointerdown", onFirstTap); }
+            if (lane) {
+              lane.removeEventListener("pointerdown", onLaneTap);
+              lane.removeEventListener("pointerdown", onCalibTap);
+              lane.removeEventListener("touchend", onStartTap);
+              lane.removeEventListener("click", onStartTap);
+            }
             const ah = document.getElementById("bv-attack-hint"); if (ah) ah.remove();
             const aj = document.getElementById("bv-attack-judge"); if (aj) aj.remove();
             const calBtnA = $("calibration-btn"); if (calBtnA) calBtnA.disabled = false; // ターン終了で再有効化
