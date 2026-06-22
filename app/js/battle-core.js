@@ -238,6 +238,11 @@
           $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始" + songInfo;
           const onFirstTap = (e) => {
             if (e.cancelable) e.preventDefault();
+            // キャリブレーション中はターンを開始せず、タップをキャリブレーション記録へ回す
+            if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) {
+              if (window.RhythmAttack.tapNote) window.RhythmAttack.tapNote(e);
+              return;
+            }
             if (lane) lane.removeEventListener("pointerdown", onFirstTap);
             // 前ラウンド終了で disabled=true のままだと .click() が無視され開始できない→必ず有効化
             if (startBtn) { startBtn.disabled = false; startBtn.click(); } // 開始(ユーザー操作内なので音声OK)
@@ -382,16 +387,15 @@
           $("bv-rhythm-prompt").textContent = base + " ｜ PERFECT " + tally.perfect + " / GOOD " + tally.good;
         }
         function floatHit(rank, text) {
+          // マーカー発光は「弱点が可視のとき」だけ。手探り(不正解)時は位置を晒さない=探す要素を維持。
           const m = document.getElementById("bv-weakpoint");
-          if (m) { m.classList.add("hit-" + rank); setTimeout(() => m.classList.remove("hit-" + rank), 180); }
-          if (marker && lane) {
-            const f = document.createElement("div");
-            f.className = "bv-hitfx " + rank;
-            f.textContent = text;
-            f.style.left = (marker.u * 100) + "%";
-            f.style.top = (marker.v * 100) + "%";
-            lane.appendChild(f);
-            setTimeout(() => f.remove(), 520);
+          if (m && m.classList.contains("visible")) { m.classList.add("hit-" + rank); setTimeout(() => m.classList.remove("hit-" + rank), 180); }
+          // 判定テキストは弱点位置ではなく、ヒント直下の固定位置に表示(見やすく・位置を晒さない)。
+          if (lane) {
+            let jf = document.getElementById("bv-attack-judge");
+            if (!jf) { jf = document.createElement("div"); jf.id = "bv-attack-judge"; jf.setAttribute("aria-hidden", "true"); lane.appendChild(jf); }
+            jf.className = rank; jf.textContent = text;
+            void jf.offsetWidth; jf.classList.add("show");
           }
           const jd = $("judge"); if (jd) { jd.textContent = text; jd.className = "judge " + (rank === "good" ? "good" : rank === "perfect" ? "perfect" : "miss"); }
         }
@@ -418,6 +422,11 @@
         $("bv-rhythm-prompt").textContent = "▶ 画面をタップして開始（弱点を拍でタップ）" + songInfo;
         const onFirstTap = (e) => {
           if (e.cancelable) e.preventDefault();
+          // キャリブレーション中はターンを開始せず、タップをキャリブレーション記録へ回す
+          if (window.RhythmAttack && window.RhythmAttack.isCalibrating && window.RhythmAttack.isCalibrating()) {
+            if (window.RhythmAttack.tapNote) window.RhythmAttack.tapNote(e);
+            return;
+          }
           if (lane) lane.removeEventListener("pointerdown", onFirstTap);
           if (startBtn) { startBtn.disabled = false; startBtn.click(); }
           beginPlay();
@@ -433,6 +442,7 @@
             window.RhythmBridge.onRoundEnd = null;
             if (lane) { lane.removeEventListener("pointerdown", onLaneTap); lane.removeEventListener("pointerdown", onFirstTap); }
             const ah = document.getElementById("bv-attack-hint"); if (ah) ah.remove();
+            const aj = document.getElementById("bv-attack-judge"); if (aj) aj.remove();
             if (window.RhythmAttack && window.RhythmAttack.setMarkerMode) window.RhythmAttack.setMarkerMode(false);
             if (startBtn) startBtn.disabled = true;
             const title = $("battle-result-title"); if (title) title.textContent = "攻撃ターン終了";

@@ -34,6 +34,9 @@
     const patSeq = window.BattleCore.createPatternSequencer();
     // 弱点案は短めの4小節で1ターンとする(エンジンは各ページ独立インスタンスのため他案に影響なし)
     if (window.RhythmAttack && window.RhythmAttack.setBars) window.RhythmAttack.setBars(4);
+    // キャリブレーションボタンをbody直下へ移し、レーンに隠れず最前面で操作できるようにする
+    const calBtn = document.getElementById("calibration-btn");
+    if (calBtn && calBtn.parentNode !== document.body) document.body.appendChild(calBtn);
 
     while (!core.isOver()) {
       // 1. クイズ(毎サイクル)。正解で弱点可視化＋攻撃バフ。
