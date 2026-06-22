@@ -245,8 +245,10 @@
               return;
             }
             if (lane) lane.removeEventListener("pointerdown", onFirstTap);
-            // 前ラウンド終了で disabled=true のままだと .click() が無視され開始できない→必ず有効化
-            if (startBtn) { startBtn.disabled = false; startBtn.click(); } // 開始(ユーザー操作内なので音声OK)
+            if (startBtn) startBtn.disabled = false;
+            // 実タップ内で直接 start() を呼ぶ(iOSは合成clickだとAudioContextを解錠できないため)
+            if (window.RhythmAttack && window.RhythmAttack.startGame) window.RhythmAttack.startGame();
+            else if (startBtn) startBtn.click();
             beginPlay();
             $("bv-rhythm-prompt").textContent = base + songInfo;
           };
@@ -430,7 +432,9 @@
             return;
           }
           if (lane) lane.removeEventListener("pointerdown", onFirstTap);
-          if (startBtn) { startBtn.disabled = false; startBtn.click(); }
+          if (startBtn) startBtn.disabled = false;
+          if (window.RhythmAttack && window.RhythmAttack.startGame) window.RhythmAttack.startGame();
+          else if (startBtn) startBtn.click();
           beginPlay();
           updatePrompt();
         };

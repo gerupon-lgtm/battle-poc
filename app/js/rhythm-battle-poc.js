@@ -26,9 +26,11 @@
     attackGoodMs: 110,
     // 防御モード(弱点案): タップ判定は行うが敵ダメージ/撃破は発生させない(防御ターンで「撃破」を出さない)。
     defenseNoEnemyDamage: false,
-    // ビート(メトロノーム)振動を出すか。tap振動とは独立。弱点案では設定ファイルで切替可。
+    // ビート(メトロノーム)振動を出すか。tap振動とは独立。弱点案では設定ファイルで切替可(Android)。
     hapticBeatGuide: true,
-    // タップ時振動の長さ(ms)。Android=Vibration API / iOS=スイッチ要素のハプティック。
+    // タップ時振動を出すか(Android)。iOSは現状不可。
+    hapticTapEnabled: true,
+    // タップ時振動の長さ(ms)。Android=Vibration API。
     hapticTapMs: 12,
   };
 
@@ -784,6 +786,7 @@
     return iosHapticLabel;
   }
   function hapticTapFeedback() {
+    if (!SETTINGS.hapticTapEnabled) return;
     // 標準 Vibration API(Android等)
     if (supportsVibration(window.navigator)) {
       try { navigator.vibrate(SETTINGS.hapticTapMs); } catch (_) { /* 任意機能 */ }
@@ -1775,6 +1778,10 @@
     setDefenseMode: function (on) { SETTINGS.defenseNoEnemyDamage = !!on; },
     isCalibrating: function () { return !!state.calibrating; },
     setHapticBeatGuide: function (on) { SETTINGS.hapticBeatGuide = !!on; },
+    setHapticTap: function (on) { SETTINGS.hapticTapEnabled = !!on; },
+    // 画面タップ開始用: 実際のタップ(ユーザー操作)内で直接 start() を呼ぶ。
+    // 合成 click 経由だと iOS で AudioContext を解錠できず開始できないため。
+    startGame: function () { return start(); },
     getBars: function () { return SETTINGS.bars; },
     judgeBeatTap: function (event) {
       if (!state.running || state.countingIn) return { valid: false, rank: "miss", offsetMs: null, beatIndex: -1 };
