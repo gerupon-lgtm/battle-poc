@@ -285,6 +285,30 @@ body[data-stage="rhythm"] #bv-log { max-height: 84px; }
   50% { transform: translate(-50%, -50%) scale(1.25); }
 }
 
+/* 攻撃ターンの操作ヒント(カウント中から表示。レーン上部=中央のカウントに被らない) */
+#bv-attack-hint {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(15,23,42,0.92); color: #fff;
+  font-weight: 800; font-size: 16px; letter-spacing: .03em;
+  padding: 8px 16px; border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.28);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+  z-index: 8; pointer-events: none; white-space: nowrap;
+  animation: bv-hint-pulse 1.2s ease-in-out infinite;
+}
+#bv-attack-hint .bv-hint-dot {
+  width: 16px; height: 16px; border-radius: 50%; display: inline-block; flex: 0 0 auto;
+  background: radial-gradient(circle, rgba(255,40,40,0.95), rgba(255,40,40,0.5) 60%, transparent 78%);
+  box-shadow: 0 0 10px rgba(255,40,40,0.85);
+  border: 2px solid rgba(255,140,140,0.95);
+}
+@keyframes bv-hint-pulse { 0%, 100% { opacity: .85; } 50% { opacity: 1; } }
+@media (max-width: 560px) {
+  #bv-attack-hint { font-size: 13px; padding: 6px 12px; }
+  #bv-attack-hint .bv-hint-dot { width: 13px; height: 13px; }
+}
+
 /* =====================================================
    弱点ねらい案: ターン開始トースト / ターン別背景色 / 攻撃ヒット表示
    ===================================================== */
