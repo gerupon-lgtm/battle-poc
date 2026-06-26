@@ -1839,6 +1839,7 @@
     const marker = opts.marker || null;
     const atkWin = { perfectMs: SETTINGS.attackPerfectMs, goodMs: SETTINGS.attackGoodMs };
     const tally = { perfect: 0, good: 0, defMisses: 0 };
+    let _atkOffSum = 0, _atkOffN = 0; // 診断: 攻撃タップの平均オフセット
     const usedAtk = new Set();
     const calMs = (typeof state.calibrationOffsetMs === "number") ? state.calibrationOffsetMs : 0;
     // 振動(Androidのみ。iOSはVibration API非対応で無効)。tap=タップごと / beat=拍ごと。
@@ -1858,7 +1859,7 @@
       if (L) L.removeEventListener("pointerdown", onTap);
       defNotes.forEach(function (r) { if (r.el) r.el.remove(); });
       var _j2 = document.getElementById("bv-attack-judge"); if (_j2) _j2.remove();
-      if (opts.onEnd) opts.onEnd({ perfect: tally.perfect, good: tally.good, defMisses: tally.defMisses, decided: decided, paused: pausedFlag });
+      if (opts.onEnd) opts.onEnd({ perfect: tally.perfect, good: tally.good, defMisses: tally.defMisses, decided: decided, paused: pausedFlag, avgAtkOff: _atkOffN ? Math.round(_atkOffSum / _atkOffN) : null, atkTaps: _atkOffN });
     }
     // 一時停止(中断): 音源を止めて静かに終了。onEnd は paused:true。
     comboActiveAbort = function () { pausedFlag = true; try { stopTrackedSources(state.activeSources); } catch (_) {} finishCombo(); };
@@ -1980,6 +1981,7 @@
       // 攻撃
       if (bi >= atkStart && bi < atkEnd) {
         const offMs = songMs - bi * beatMs;
+        if (Math.abs(offMs) <= 300) { _atkOffSum += offMs; _atkOffN++; } // 診断(±300ms内のみ集計)
         // 大きくタイミングを外す(GOOD窓外)＝ペナルティ。連打抑止はここだけ。
         if (Math.abs(offMs) > atkWin.goodMs) { if (!decided) penalize(bi, tapWall); return; }
         // タイミングはOK。位置のみNG・二度押しは「位置×」ソフト(ペナルティ無し)。

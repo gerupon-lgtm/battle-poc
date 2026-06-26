@@ -296,6 +296,7 @@
 
       patSeq.update(true);
       const atkApplied = res._atkApplied || 0;
+      core.log("【診断】攻撃 平均オフセット " + (res.avgAtkOff == null ? "-" : (res.avgAtkOff > 0 ? "+" : "") + res.avgAtkOff + "ms") + " / 計測" + (res.atkTaps || 0) + "タップ / 弱点" + (buffed ? "可視" : "非表示"), "info");
       if (atkApplied > 0) core.log("こうげき! " + enemy.name + "に 計" + atkApplied + " ダメージ (PERFECT" + res.perfect + "/GOOD" + res.good + (buffed ? " ×バフ" : "") + ")", "good");
       else core.log("弱点を捉えられなかった...", "bad");
       if (res.defMisses > 0) core.log("防御: 被弾Miss" + res.defMisses + " → 計" + (res.defMisses * CONFIG.DEFENSE_MISS_DAMAGE) + "ダメージ", "bad");
