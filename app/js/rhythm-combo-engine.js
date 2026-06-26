@@ -1974,7 +1974,7 @@
       const tapWall = (ev.timeStamp || performance.now());
       if (tapWall < lockUntil) return; // ロック中は受け付けない(連打しても無駄)
       tapVibe(); // タップ振動(Android)
-      const songMs = tapWall - startWallMs; // 判定は raw(防御と同条件)。calMsはcomboでは未使用
+      const songMs = tapWall - startWallMs - calMs; // キャリブレーション補正(攻撃・防御で一貫)
       const bi = Math.round(songMs / beatMs);
       // 攻撃
       if (bi >= atkStart && bi < atkEnd) {
@@ -1997,7 +1997,7 @@
         let best = null, bestAbs = 1e9;
         for (const rec of defNotes) {
           if (rec.hit || rec.missed) continue;
-          const d = Math.abs(tapWall - rec.atMs);
+          const d = Math.abs((tapWall - calMs) - rec.atMs); // 防御もキャリブレーション補正
           if (d < bestAbs) { bestAbs = d; best = rec; }
         }
         if (best && bestAbs <= SETTINGS.goodMs) { best.hit = true; if (best.el) best.el.remove(); floatJudge("good", "Block!"); }
