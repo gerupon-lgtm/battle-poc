@@ -316,7 +316,7 @@
   }
 
   function buildSongBeatEvents(songId, index) {
-    const song = SONG_DEFINITIONS[songId] || SONG_DEFINITIONS.straight;
+    const song = EXTRA_SONGS[songId] || SONG_DEFINITIONS[songId] || SONG_DEFINITIONS.straight;
     const beatInBar = index % 4;
     const phrase = Math.floor(index / 8) % song.bass.length;
     const bass = song.bass[phrase];
@@ -399,8 +399,8 @@
   function buildNoteChart(options) {
     const bpm = options.bpm;
     const bars = options.bars;
-    const song = SONG_DEFINITIONS[options.songId] || SONG_DEFINITIONS.straight;
-    const pattern = CHART_DEFINITIONS[options.patternId] || CHART_DEFINITIONS.basic;
+    const song = EXTRA_SONGS[options.songId] || SONG_DEFINITIONS[options.songId] || SONG_DEFINITIONS.straight;
+    const pattern = EXTRA_CHARTS[options.patternId] || CHART_DEFINITIONS[options.patternId] || CHART_DEFINITIONS.basic;
     const beat = beatSeconds(bpm);
     const notes = [];
     let id = 0;
@@ -417,6 +417,7 @@
         notes.push({
           id,
           beat: groovedBeat,
+          rawBeat: rawBeat,
           phase,
           time: groovedBeat * beat,
           lane,
@@ -437,7 +438,7 @@
   }
 
   function buildHintCue(songId, beatIndex) {
-    const song = SONG_DEFINITIONS[songId] || SONG_DEFINITIONS.straight;
+    const song = EXTRA_SONGS[songId] || SONG_DEFINITIONS[songId] || SONG_DEFINITIONS.straight;
     let root;
     if (songId === "jazz") {
       const bar = Math.floor((beatIndex % 32) / 4);
@@ -565,6 +566,9 @@
   }
 
   const $ = (id) => document.getElementById(id);
+  // 外部差し替え用の曲/タップパターン(登録APIで追加)。組込みより優先。
+  const EXTRA_SONGS = {};
+  const EXTRA_CHARTS = {};
 
   function updateVisualBeatGuide(beatIndex, pulse) {
     const guide = $("beat-guide");
@@ -1775,6 +1779,7 @@
   // 入力判定・ダメージ・鳴動は段階的に追加(本実装は骨格=音/ゲージ/カウント/トースト)。
   // ============================================================
   let comboTimers = [];
+  let comboActiveAbort = null;
   function comboClear() { for (const t of comboTimers) clearTimeout(t); comboTimers = []; }
   function comboCountHits(startBeat, bars) {
     const hits = [];
@@ -1792,7 +1797,9 @@
     const A = ensureAudio();
     if (opts.bpm) SETTINGS.bpm = opts.bpm;
     const beat = beatSeconds(SETTINGS.bpm);
-    const songId = SONG_DEFINITIONS[opts.songId] ? opts.songId : "straight";
+    const _hasSong = function (id) { return !!(EXTRA_SONGS[id] || SONG_DEFINITIONS[id]); };
+    const atkSong = _hasSong(opts.attackSongId) ? opts.attackSongId : (_hasSong(opts.songId) ? opts.songId : "straight");
+    const defSong = _hasSong(opts.defenseSongId) ? opts.defenseSongId : atkSong;
     const caBars = opts.countAttackBars || 2, cdBars = opts.countDefenseBars || 1;
     const cAtk = caBars * 4, atk = (opts.attackBars || 4) * 4, cDef = cdBars * 4, def = (opts.defenseBars || 4) * 4;
     const atkStart = cAtk, atkEnd = cAtk + atk;
@@ -1805,11 +1812,13 @@
     const atkHits = comboCountHits(0, caBars);
     const defHits = comboCountHits(defCountStart, cdBars);
     for (const h of atkHits.concat(defHits)) playCountTone(startTime + h.beat * beat, h.strong ? 1 : 2);
-    for (let i = atkStart; i < atkEnd; i++) scheduleSongBeat(songId, i - atkStart, startTime + i * beat);
-    for (let i = defStart; i < defEnd; i++) scheduleSongBeat(songId, i - defStart, startTime + i * beat);
+    for (let i = atkStart; i < atkEnd; i++) scheduleSongBeat(atkSong, i - atkStart, startTime + i * beat);
+    for (let i = defStart; i < defEnd; i++) scheduleSongBeat(defSong, i - defStart, startTime + i * beat);
 
     // 映像(壁時計/ setTimeout): 四分音符ゲージ・カウント表示・トースト
-    if (countEl) countEl.hidden = false;
+    if (countEl) { countEl.hidden = true; countEl.textContent = ""; } // リード中に前セットの数字を残さない
+    var _jEl = document.getElementById("bv-attack-judge"); if (_jEl) _jEl.remove(); // 前セットのDamage等を消す
+    var _nC = $("notes"); if (_nC) _nC.innerHTML = ""; // 前セットの残ノーツを消す
     function at(beatIndex, fn) { comboTimers.push(setTimeout(fn, Math.max(0, (startTime + beatIndex * beat - A.currentTime) * 1000))); }
     for (let i = 0; i < total; i++) {
       (function (bi) { at(bi, function () { updateVisualBeatGuide(bi % 4, true); comboTimers.push(setTimeout(function () { updateVisualBeatGuide(bi % 4, false); }, 110)); }); })(i);
@@ -1819,15 +1828,165 @@
     }
     at(0, function () { if (opts.onPhase) opts.onPhase("attack"); });
     at(atkStart, function () { if (countEl) countEl.hidden = true; });
-    at(defCountStart, function () { if (opts.onPhase) opts.onPhase("defense"); });
+    at(defCountStart, function () { if (decided) return; if (opts.onPhase) opts.onPhase("defense"); });
     at(defStart, function () { if (countEl) countEl.hidden = true; });
-    at(total + 0.5, function () { resetVisualBeatGuide(); if (countEl) countEl.hidden = true; if (opts.onEnd) opts.onEnd(); });
+    // ===== 入力判定・防御ノーツ・集計(段階2) =====
+    const _wsync = measureAudioWallSync(A, 5);
+    const startWallMs = _wsync ? calculateVisualSongStartMs(_wsync.perfMs, _wsync.audioSec, startTime)
+                               : (performance.now() + (startTime - A.currentTime) * 1000);
+    const beatMs = beat * 1000;
+    const L = $("lane");
+    const marker = opts.marker || null;
+    const atkWin = { perfectMs: SETTINGS.attackPerfectMs, goodMs: SETTINGS.attackGoodMs };
+    const tally = { perfect: 0, good: 0, defMisses: 0 };
+    const usedAtk = new Set();
+    const calMs = (typeof state.calibrationOffsetMs === "number") ? state.calibrationOffsetMs : 0;
+    let decided = false, ended = false, pausedFlag = false;
+    function finishCombo() {
+      if (ended) return; ended = true;
+      comboActiveAbort = null;
+      comboClear();
+      resetVisualBeatGuide();
+      if (countEl) countEl.hidden = true;
+      if (L) L.removeEventListener("pointerdown", onTap);
+      defNotes.forEach(function (r) { if (r.el) r.el.remove(); });
+      var _j2 = document.getElementById("bv-attack-judge"); if (_j2) _j2.remove();
+      if (opts.onEnd) opts.onEnd({ perfect: tally.perfect, good: tally.good, defMisses: tally.defMisses, decided: decided, paused: pausedFlag });
+    }
+    // 一時停止(中断): 音源を止めて静かに終了。onEnd は paused:true。
+    comboActiveAbort = function () { pausedFlag = true; try { stopTrackedSources(state.activeSources); } catch (_) {} finishCombo(); };
+    // 決着(撃破): 決着小節末まで演奏、4拍目決着なら次の1小節も。曲末でcap(防御最終4拍目=延長なし)。
+    function registerDecision(beatIndex) {
+      if (decided) return; decided = true;
+      if (L) L.removeEventListener("pointerdown", onTap);
+      const bar = Math.floor(beatIndex / 4);
+      let ringEnd = (bar + 1) * 4;
+      if (beatIndex % 4 === 3) ringEnd += 4;          // 4拍目決着→次の1小節も
+      // フェーズ境界でcap(カウントは鳴動に含めない/直前4拍目決着はそのバー末で停止)
+      let phaseEnd = total;
+      if (beatIndex >= atkStart && beatIndex < atkEnd) phaseEnd = atkEnd;
+      else if (beatIndex >= defStart && beatIndex < defEnd) phaseEnd = defEnd;
+      if (ringEnd > phaseEnd) ringEnd = phaseEnd;
+      const tms = Math.max(0, (startTime + ringEnd * beat - 0.03 - A.currentTime) * 1000); // 境界のカウント音を鳴らさない
+      comboTimers.push(setTimeout(function () { try { stopTrackedSources(state.activeSources); } catch (_) {} finishCombo(); }, tms));
+    }
+
+    function floatJudge(rank, text) {
+      let jf = document.getElementById("bv-attack-judge");
+      if (!jf && L) { jf = document.createElement("div"); jf.id = "bv-attack-judge"; jf.setAttribute("aria-hidden", "true"); L.appendChild(jf); }
+      if (jf) { jf.className = rank; jf.textContent = text; void jf.offsetWidth; jf.classList.add("show"); }
+    }
+    function flashMarker(rank) {
+      const m = document.getElementById("bv-weakpoint");
+      if (m && m.classList.contains("visible")) { m.classList.add("hit-" + rank); setTimeout(function () { m.classList.remove("hit-" + rank); }, 160); }
+    }
+
+    // 防御の落下ノーツ(弱点案と同じ見た目: .note-motion > .note。パターンは flow から指定)
+    const defChart = buildNoteChart({ bpm: SETTINGS.bpm, bars: opts.defenseBars || 4, songId: defSong, patternId: opts.defensePatternId || "basic" });
+    const appearSec = (typeof opts.noteAppearSec === "number" && opts.noteAppearSec > 0) ? opts.noteAppearSec : 2;
+    const exitSec = 0.18;
+    const hitLine = L ? L.querySelector(".hit-line") : null;
+    const hitY = hitLine ? calculateHitY(hitLine.offsetTop, hitLine.offsetHeight) : 200;
+    const travel = hitY + 50;
+    const exitTravel = travel * exitSec / appearSec;
+    const noteDur = (appearSec + exitSec) * 1000;
+    const hitOffset = appearSec / (appearSec + exitSec);
+    const timelineNow = (document.timeline && Number.isFinite(document.timeline.currentTime)) ? document.timeline.currentTime : performance.now();
+    const defNotes = [];
+    for (const n of defChart) {
+      const globalBeat = defStart + n.beat;
+      const noteTimeSec = globalBeat * beat;
+      const motionEl = document.createElement("div");
+      motionEl.className = "note-motion compositor-note-motion";
+      motionEl.style.left = (n.phase === "head" ? 27 : 73) + "%";
+      motionEl.style.top = "-50px";
+      const noteEl = document.createElement("div");
+      noteEl.className = "note phase-" + n.phase + (n.accent ? " accent" : "");
+      motionEl.appendChild(noteEl);
+      if ($("notes")) $("notes").appendChild(motionEl);
+      try {
+        const delay = calculateNoteAnimationDelayMs(startWallMs, noteTimeSec, appearSec, timelineNow);
+        const anim = motionEl.animate([
+          { transform: "translate3d(0,0,0)", opacity: 1, offset: 0 },
+          { transform: "translate3d(0," + travel + "px,0)", opacity: 1, offset: hitOffset },
+          { transform: "translate3d(0," + (travel + exitTravel) + "px,0)", opacity: 0, offset: 1 },
+        ], { duration: noteDur, delay: delay, easing: "linear", fill: "none" });
+        anim.startTime = timelineNow;
+      } catch (_) {}
+      const rec = { el: motionEl, atMs: startWallMs + noteTimeSec * 1000, gbeat: globalBeat, hit: false, missed: false };
+      defNotes.push(rec);
+      comboTimers.push(setTimeout(function () {
+        if (!rec.hit && !rec.missed) { rec.missed = true; tally.defMisses++; if (rec.el) rec.el.remove(); floatJudge("miss", "Damage!"); if (opts.onDefenseMiss && opts.onDefenseMiss()) registerDecision(Math.round(rec.gbeat)); }
+      }, Math.max(0, (rec.atMs + SETTINGS.goodMs) - performance.now())));
+    }
+
+    // ガイド音(ヒント): 攻撃の各拍／防御の各ノーツに案内音。設定でON/OFF。
+    if (opts.guideSound) {
+      for (let gi = atkStart; gi < atkEnd; gi++) playHintCue(startTime + gi * beat, buildHintCue(atkSong, gi - atkStart));
+      for (const gn of defChart) playHintCue(startTime + (defStart + gn.beat) * beat, buildHintCue(defSong, gn.rawBeat));
+    }
+
+    // 連打抑止: ミスタップ(大きく外す/弱点を外す/二度押し)は MISS! 表示＋短時間の入力ロック＋小ペナルティ。
+    let lockUntil = 0;
+    const LOCK_MS = (typeof opts.lockoutMs === "number") ? opts.lockoutMs : 300;
+    function penalize(bi, tapWall) {
+      floatJudge("miss", "MISS!");
+      lockUntil = tapWall + LOCK_MS;
+      if (!decided && opts.onPenalty && opts.onPenalty()) registerDecision(bi);
+    }
+    function onTap(ev) {
+      if (ev.cancelable) ev.preventDefault();
+      if (decided) return;
+      const tapWall = (ev.timeStamp || performance.now());
+      if (tapWall < lockUntil) return; // ロック中は受け付けない(連打しても無駄)
+      const songMs = tapWall - startWallMs - calMs;
+      const bi = Math.round(songMs / beatMs);
+      // 攻撃
+      if (bi >= atkStart && bi < atkEnd) {
+        const offMs = songMs - bi * beatMs;
+        // 大きくタイミングを外す(GOOD窓外)＝ペナルティ。連打抑止はここだけ。
+        if (Math.abs(offMs) > atkWin.goodMs) { if (!decided) penalize(bi, tapWall); return; }
+        // タイミングはOK。位置のみNG・二度押しは「位置×」ソフト(ペナルティ無し)。
+        if (!marker || usedAtk.has(bi)) { floatJudge("miss", "位置×"); return; }
+        const lr = L.getBoundingClientRect();
+        const mx = lr.width * marker.u, my = lr.height * marker.v;
+        const within = Math.hypot((ev.clientX - lr.left) - mx, (ev.clientY - lr.top) - my) <= marker.rPx;
+        if (!within) { floatJudge("miss", "位置×"); return; }
+        const r = judgeHit(offMs, atkWin);
+        if (r.rank === "perfect") { usedAtk.add(bi); tally.perfect++; flashMarker("perfect"); floatJudge("perfect", "PERFECT"); if (opts.onAttackHit && opts.onAttackHit("perfect")) registerDecision(bi); }
+        else { usedAtk.add(bi); tally.good++; flashMarker("good"); floatJudge("good", "GOOD"); if (opts.onAttackHit && opts.onAttackHit("good")) registerDecision(bi); }
+        return;
+      }
+      // 防御
+      if (bi >= defStart && bi < defEnd) {
+        let best = null, bestAbs = 1e9;
+        for (const rec of defNotes) {
+          if (rec.hit || rec.missed) continue;
+          const d = Math.abs(tapWall - rec.atMs);
+          if (d < bestAbs) { bestAbs = d; best = rec; }
+        }
+        if (best && bestAbs <= SETTINGS.goodMs) { best.hit = true; if (best.el) best.el.remove(); floatJudge("good", "Block!"); }
+        else if (!decided) penalize(bi, tapWall); // 近くにノーツが無い=大きく外す→ペナルティ
+        return;
+      }
+      // カウント等はペナルティなし
+    }
+    if (L) L.addEventListener("pointerdown", onTap);
+
+    at(total + 0.5, function () { finishCombo(); });
   }
 
   window.ComboEngine = {
     startCombo: startCombo,
     stop: function () { comboClear(); },
     resume: function () { const a = ensureAudio(); return (a.state !== "running") ? a.resume() : Promise.resolve(); },
+    requestPause: function () { if (comboActiveAbort) comboActiveAbort(); },
+    registerSong: function (id, def) { if (id && def) EXTRA_SONGS[id] = def; },
+    registerPattern: function (id, def) { if (id && def) EXTRA_CHARTS[id] = def; },
+    listSongs: function () { return Object.keys(SONG_DEFINITIONS).concat(Object.keys(EXTRA_SONGS)); },
+    listPatterns: function () { return Object.keys(CHART_DEFINITIONS).concat(Object.keys(EXTRA_CHARTS)); },
+    isCalibrating: function () { return !!state.calibrating; },
+    tapNote: function (e) { attack(e); },
   };
 
   // 弱点ねらい(マーカー攻撃)用: タップの「最寄り四分音符」に対する時間判定を外部へ公開。
