@@ -68,3 +68,14 @@ body.page-combo #bv-combo-start .cs-go {
   body.page-combo #bv-combo-start .cs-ico { font-size: 24px; }
   body.page-combo #bv-combo-start .cs-go { font-size: 17px; }
 }
+
+/* 攻撃の接近リング(縮んでマーカーに重なった瞬間がタップ) */
+body.page-combo .bv-approach {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid rgba(255,230,120,0.95);
+  box-shadow: 0 0 10px rgba(255,200,80,0.6), inset 0 0 8px rgba(255,200,80,0.4);
+  pointer-events: none;
+  z-index: 5;            /* マーカー(4)より前 */
+  transform: translate(-50%,-50%) scale(3.4);
+}

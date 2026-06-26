@@ -1933,6 +1933,33 @@
       for (const gn of defChart) playHintCue(startTime + (defStart + gn.beat) * beat, buildHintCue(defSong, gn.rawBeat));
     }
 
+    // 攻撃の接近リング(弱点可視時のみ): 各拍に向けて縮むリングで「今タップ」を予兆する。
+    const _mkEl = document.getElementById("bv-weakpoint");
+    const approachBeats = (typeof opts.approachBeats === "number" && opts.approachBeats > 0) ? opts.approachBeats : 1.5;
+    if (marker && _mkEl && _mkEl.classList.contains("visible") && L) {
+      const totalB = approachBeats + 0.18;
+      const hitFrac = approachBeats / totalB;
+      for (let ai = atkStart; ai < atkEnd; ai++) {
+        const ring = document.createElement("div");
+        ring.className = "bv-approach";
+        ring.style.left = (marker.u * 100) + "%";
+        ring.style.top = (marker.v * 100) + "%";
+        ring.style.width = (marker.rPx * 2) + "px";
+        ring.style.height = (marker.rPx * 2) + "px";
+        L.appendChild(ring);
+        const arriveWall = startWallMs + ai * beatMs;
+        try {
+          const anim = ring.animate([
+            { transform: "translate(-50%,-50%) scale(3.4)", opacity: 0.12, offset: 0 },
+            { transform: "translate(-50%,-50%) scale(1)", opacity: 0.95, offset: hitFrac },
+            { transform: "translate(-50%,-50%) scale(0.85)", opacity: 0, offset: 1 },
+          ], { duration: totalB * beatMs, delay: (arriveWall - approachBeats * beatMs) - timelineNow, easing: "linear", fill: "none" });
+          anim.startTime = timelineNow;
+        } catch (_) {}
+        comboTimers.push(setTimeout(function () { ring.remove(); }, Math.max(0, (arriveWall + 0.25 * beatMs) - performance.now())));
+      }
+    }
+
     // 連打抑止: ミスタップ(大きく外す/弱点を外す/二度押し)は MISS! 表示＋短時間の入力ロック＋小ペナルティ。
     let lockUntil = 0;
     const LOCK_MS = (typeof opts.lockoutMs === "number") ? opts.lockoutMs : 300;
@@ -1947,7 +1974,7 @@
       const tapWall = (ev.timeStamp || performance.now());
       if (tapWall < lockUntil) return; // ロック中は受け付けない(連打しても無駄)
       tapVibe(); // タップ振動(Android)
-      const songMs = tapWall - startWallMs - calMs;
+      const songMs = tapWall - startWallMs; // 判定は raw(防御と同条件)。calMsはcomboでは未使用
       const bi = Math.round(songMs / beatMs);
       // 攻撃
       if (bi >= atkStart && bi < atkEnd) {

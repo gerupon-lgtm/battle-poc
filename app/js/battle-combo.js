@@ -18,6 +18,7 @@
     DIFFERENT_SONGS: false, // true で攻撃/防御を別曲(BPM共通=テンポは乱れない)
     GUIDE_SOUND: true,      // タップ位置を示すガイド音(ヒント音)。false で無音。
     NOTE_APPEAR_SEC: 1.5,   // 防御ノーツの落下時間(秒)。小さいほど速く・カウントと重なりにくい。
+    APPROACH_BEATS: 1.5,    // 攻撃の接近リングが縮む拍数(予兆。小さいほど速い)。
     // ダメージ
     ATTACK_MAX_PER_TURN: 25, GOOD_WEIGHT: 0.5, QUIZ_BUFF_MULT: 1.5,
     DEFENSE_MISS_DAMAGE: 8,
@@ -200,6 +201,7 @@
         marker: opts.marker,
         guideSound: CONFIG.GUIDE_SOUND,
         noteAppearSec: CONFIG.NOTE_APPEAR_SEC,
+        approachBeats: CONFIG.APPROACH_BEATS,
         hapticTap: CONFIG.HAPTIC_TAP,
         hapticBeat: CONFIG.HAPTIC_BEAT,
         hapticTapMs: CONFIG.HAPTIC_TAP_MS,
