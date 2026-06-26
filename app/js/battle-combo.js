@@ -24,6 +24,9 @@
     // 連打抑止: ミスタップ時の入力ロック(ms)と小ペナルティ(自分への被ダメージ)
     LOCKOUT_MS: 300,
     PENALTY_DAMAGE: 2,
+    // 弱点の当たり範囲(タップ許容半径px)。可視時=HIT_RADIUS_PX、非表示(手探り)時=×HIDDEN_RADIUS_MULT。
+    HIT_RADIUS_PX: 30,
+    HIDDEN_RADIUS_MULT: 2,
   };
 
   // 設定の保存/読込: ファイルの CONFIG をデフォルトとし、localStorage の保存値で上書きする。
@@ -228,6 +231,7 @@
       // セットのリズムブロック(ポーズ対応: 再開=このセットを最初から)
       while (true) {
         const marker = await core.placeWeakpoint(!!buffed);
+        if (marker) marker.rPx = buffed ? CONFIG.HIT_RADIUS_PX : CONFIG.HIT_RADIUS_PX * CONFIG.HIDDEN_RADIUS_MULT;
         await tapToStart(buffed);
         const prompt = document.getElementById("bv-rhythm-prompt");
         if (prompt) prompt.textContent = "攻撃:光る弱点を拍タップ → 防御:落下ノーツをどこでもタップ（連続）";
