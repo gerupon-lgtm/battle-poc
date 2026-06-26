@@ -27,6 +27,10 @@
     // 弱点の当たり範囲(タップ許容半径px)。可視時=HIT_RADIUS_PX、非表示(手探り)時=×HIDDEN_RADIUS_MULT。
     HIT_RADIUS_PX: 30,
     HIDDEN_RADIUS_MULT: 2,
+    // 振動(Androidのみ。iOSは不可)。タップ振動と拍振動を個別にON/OFF。
+    HAPTIC_TAP: true,
+    HAPTIC_BEAT: false,
+    HAPTIC_TAP_MS: 12,
   };
 
   // 設定の保存/読込: ファイルの CONFIG をデフォルトとし、localStorage の保存値で上書きする。
@@ -196,6 +200,9 @@
         marker: opts.marker,
         guideSound: CONFIG.GUIDE_SOUND,
         noteAppearSec: CONFIG.NOTE_APPEAR_SEC,
+        hapticTap: CONFIG.HAPTIC_TAP,
+        hapticBeat: CONFIG.HAPTIC_BEAT,
+        hapticTapMs: CONFIG.HAPTIC_TAP_MS,
         lockoutMs: CONFIG.LOCKOUT_MS,
         onAttackHit: opts.onAttackHit,
         onDefenseMiss: opts.onDefenseMiss,

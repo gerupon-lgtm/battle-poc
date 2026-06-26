@@ -1841,6 +1841,13 @@
     const tally = { perfect: 0, good: 0, defMisses: 0 };
     const usedAtk = new Set();
     const calMs = (typeof state.calibrationOffsetMs === "number") ? state.calibrationOffsetMs : 0;
+    // 振動(Androidのみ。iOSはVibration API非対応で無効)。tap=タップごと / beat=拍ごと。
+    const supportsVibe = (typeof navigator !== "undefined" && typeof navigator.vibrate === "function");
+    function tapVibe() { if (opts.hapticTap && supportsVibe) { try { navigator.vibrate(opts.hapticTapMs || 12); } catch (_) {} } }
+    if (opts.hapticBeat && supportsVibe) {
+      for (let _bi = atkStart; _bi < atkEnd; _bi++) at(_bi, function () { try { navigator.vibrate(12); } catch (_) {} });
+      for (let _bi = defStart; _bi < defEnd; _bi++) at(_bi, function () { try { navigator.vibrate(12); } catch (_) {} });
+    }
     let decided = false, ended = false, pausedFlag = false;
     function finishCombo() {
       if (ended) return; ended = true;
@@ -1939,6 +1946,7 @@
       if (decided) return;
       const tapWall = (ev.timeStamp || performance.now());
       if (tapWall < lockUntil) return; // ロック中は受け付けない(連打しても無駄)
+      tapVibe(); // タップ振動(Android)
       const songMs = tapWall - startWallMs - calMs;
       const bi = Math.round(songMs / beatMs);
       // 攻撃
