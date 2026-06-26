@@ -79,3 +79,10 @@ body.page-combo .bv-approach {
   z-index: 5;            /* マーカー(4)より前 */
   transform: translate(-50%,-50%) scale(3.4);
 }
+
+/* タップ時の端末既定ハイライト(灰色フラッシュ)を抑制 */
+body.page-combo #lane, body.page-combo #lane * {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-touch-callout: none;
+  user-select: none;
+}
