@@ -73,8 +73,8 @@ body.page-combo #bv-combo-start .cs-go {
 body.page-combo .bv-approach {
   position: absolute;
   border-radius: 50%;
-  border: 3px solid rgba(255,230,120,0.95);
-  box-shadow: 0 0 10px rgba(255,200,80,0.6), inset 0 0 8px rgba(255,200,80,0.4);
+  border: 2px solid rgba(255,225,130,0.7);
+  box-shadow: 0 0 5px rgba(255,200,80,0.3);
   pointer-events: none;
   z-index: 5;            /* マーカー(4)より前 */
   transform: translate(-50%,-50%) scale(3.4);

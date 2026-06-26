@@ -19,6 +19,8 @@
     GUIDE_SOUND: true,      // タップ位置を示すガイド音(ヒント音)。false で無音。
     NOTE_APPEAR_SEC: 1.5,   // 防御ノーツの落下時間(秒)。小さいほど速く・カウントと重なりにくい。
     APPROACH_BEATS: 1.5,    // 攻撃の接近リングが縮む拍数(予兆。小さいほど速い)。
+    APPROACH_RING: true,    // 攻撃の接近リングを出すか(弱点可視時)。false で常に非表示。
+    APPROACH_RING_COUNT: 1, // リングを出す拍数(最初の何拍ぶんか。1=一音目のみ)。
     // ダメージ
     ATTACK_MAX_PER_TURN: 25, GOOD_WEIGHT: 0.5, QUIZ_BUFF_MULT: 1.5,
     DEFENSE_MISS_DAMAGE: 8,
@@ -202,6 +204,8 @@
         guideSound: CONFIG.GUIDE_SOUND,
         noteAppearSec: CONFIG.NOTE_APPEAR_SEC,
         approachBeats: CONFIG.APPROACH_BEATS,
+        approachRing: CONFIG.APPROACH_RING,
+        approachRingCount: CONFIG.APPROACH_RING_COUNT,
         hapticTap: CONFIG.HAPTIC_TAP,
         hapticBeat: CONFIG.HAPTIC_BEAT,
         hapticTapMs: CONFIG.HAPTIC_TAP_MS,

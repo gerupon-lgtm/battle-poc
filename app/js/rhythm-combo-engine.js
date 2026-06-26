@@ -1936,10 +1936,11 @@
     // 攻撃の接近リング(弱点可視時のみ): 各拍に向けて縮むリングで「今タップ」を予兆する。
     const _mkEl = document.getElementById("bv-weakpoint");
     const approachBeats = (typeof opts.approachBeats === "number" && opts.approachBeats > 0) ? opts.approachBeats : 1.5;
-    if (marker && _mkEl && _mkEl.classList.contains("visible") && L) {
+    const ringCount = (typeof opts.approachRingCount === "number" && opts.approachRingCount >= 0) ? opts.approachRingCount : 1;
+    if (opts.approachRing !== false && ringCount > 0 && marker && _mkEl && _mkEl.classList.contains("visible") && L) {
       const totalB = approachBeats + 0.18;
       const hitFrac = approachBeats / totalB;
-      for (let ai = atkStart; ai < atkEnd; ai++) {
+      for (let ai = atkStart; ai < Math.min(atkEnd, atkStart + ringCount); ai++) {
         const ring = document.createElement("div");
         ring.className = "bv-approach";
         ring.style.left = (marker.u * 100) + "%";
@@ -1993,7 +1994,7 @@
         return;
       }
       // 防御
-      if (bi >= defStart && bi < defEnd) {
+      if (bi >= defStart && bi <= defEnd) { // 裏拍最終音は bi が defEnd に丸まるため境界を含める
         let best = null, bestAbs = 1e9;
         for (const rec of defNotes) {
           if (rec.hit || rec.missed) continue;
