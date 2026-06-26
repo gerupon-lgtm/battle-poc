@@ -1,0 +1,29 @@
+/* =====================================================
+   battle-combo.css -- 連続バトル(攻防ノンストップ)専用の最小スタイル。
+   既存CSS(rhythm-battle-poc.css / battle-verify.css)に追加で読み込む。
+   ===================================================== */
+
+/* 連続モードでは既存エンジンの操作UIは使わないので隠す */
+body.page-combo .start-controls { display: none !important; }
+body.page-combo .calibration-btn { display: none !important; }
+body.page-combo .attack-btn { display: none !important; }
+
+/* 防御の落下ノーツ(自前) */
+body.page-combo .combo-note {
+  position: absolute;
+  top: 0;
+  margin-left: -13px;            /* left:% を中心基準にする */
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #cdeeff, #3aa0ff 70%, rgba(58,160,255,0.2) 85%);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 10px rgba(58,160,255,0.85), 0 0 0 2px rgba(0,0,0,0.55);
+  z-index: 3;                    /* 落下物=キャラの前 */
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* 拍フラッシュ(テンポの視覚補助。判定線を一瞬光らせる) */
+body.page-combo .hit-line.combo-pulse {
+  box-shadow: 0 0 18px 5px rgba(255,255,255,0.7);
+}
