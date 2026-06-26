@@ -2018,6 +2018,17 @@
     startCombo: startCombo,
     stop: function () { comboClear(); },
     resume: function () { const a = ensureAudio(); return (a.state !== "running") ? a.resume() : Promise.resolve(); },
+    // 音声コンテキストを解錠＋無音ティックでウォームアップ(初回ブロックのクロック/出力遅延を安定化)。
+    warmup: function () {
+      const a = ensureAudio();
+      const p = (a.state !== "running") ? a.resume() : Promise.resolve();
+      try {
+        const o = a.createOscillator(), g = a.createGain();
+        g.gain.value = 0.00001; o.connect(g); g.connect(a.destination);
+        o.start(); o.stop(a.currentTime + 0.05);
+      } catch (_) {}
+      return p;
+    },
     requestPause: function () { if (comboActiveAbort) comboActiveAbort(); },
     registerSong: function (id, def) { if (id && def) EXTRA_SONGS[id] = def; },
     registerPattern: function (id, def) { if (id && def) EXTRA_CHARTS[id] = def; },

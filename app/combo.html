@@ -164,7 +164,7 @@
   </div>
 </div>
 
-  <script src="./js/rhythm-combo-engine.js?v=17"></script>
+  <script src="./js/rhythm-combo-engine.js?v=18"></script>
   <script src="./js/enemy-loader.js?v=2"></script>
   <script src="./js/quiz-engine.js?v=2"></script>
   <script src="./js/battle-core.js?v=25"></script>
@@ -184,6 +184,7 @@
       enemy = EnemyLoader.random();
       core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
       document.getElementById("bv-start").addEventListener("click", function () {
+        if (window.ComboEngine && window.ComboEngine.warmup) window.ComboEngine.warmup(); // 音声を早めに解錠・安定化
         core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
         FLOW.run(core);
       });
