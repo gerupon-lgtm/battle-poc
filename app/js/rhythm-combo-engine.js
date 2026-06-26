@@ -1780,6 +1780,7 @@
   // ============================================================
   let comboTimers = [];
   let comboActiveAbort = null;
+  let comboWallSync = null; // 音声↔壁時計の同期(ページ内で一度測ってキャッシュ→全セット再利用)
   function comboClear() { for (const t of comboTimers) clearTimeout(t); comboTimers = []; }
   function comboCountHits(startBeat, bars) {
     const hits = [];
@@ -1831,9 +1832,9 @@
     at(defCountStart, function () { if (decided) return; if (opts.onPhase) opts.onPhase("defense"); });
     at(defStart, function () { if (countEl) countEl.hidden = true; });
     // ===== 入力判定・防御ノーツ・集計(段階2) =====
-    const _wsync = measureAudioWallSync(A, 5);
-    const startWallMs = _wsync ? calculateVisualSongStartMs(_wsync.perfMs, _wsync.audioSec, startTime)
-                               : (performance.now() + (startTime - A.currentTime) * 1000);
+    if (!comboWallSync) comboWallSync = measureAudioWallSync(A, 8); // 初回のみ測定→以降は再利用(セット間でアンカーがブレない)
+    const startWallMs = comboWallSync ? calculateVisualSongStartMs(comboWallSync.perfMs, comboWallSync.audioSec, startTime)
+                                      : (performance.now() + (startTime - A.currentTime) * 1000);
     const beatMs = beat * 1000;
     const L = $("lane");
     const marker = opts.marker || null;
