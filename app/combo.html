@@ -34,6 +34,11 @@
 
   <section id="bv-intro" class="bv-stage">
     <p>クイズ→『カウント-攻撃-カウント-防御』を停止せず同一テンポで連続実行します。各カウント中にモード(攻撃/防御)のトーストを表示。攻撃は光る弱点を拍でタップ、防御は落下ノーツをどこでもタップ。どちらかのHPが0になるまで繰り返します。</p>
+    <fieldset class="bv-mode-select" style="border:1px solid rgba(255,255,255,.18); border-radius:10px; padding:10px 12px; margin:10px 0;">
+      <legend style="padding:0 6px; color:#cfe0ff; font-weight:800;">セット間の進み方</legend>
+      <label style="display:block; margin:4px 0; line-height:1.7;"><input type="radio" name="combo-mode" value="manual" checked> 「次へ」ボタンで進む（既定）</label>
+      <label style="display:block; margin:4px 0; line-height:1.7;"><input type="radio" name="combo-mode" value="auto"> 「次へ」を省いて自動で次のはしけんへ（ノンストップ）</label>
+    </fieldset>
     <button id="bv-start" class="bv-btn">戦闘開始</button>
   </section>
 
@@ -168,11 +173,13 @@
   <script src="./js/enemy-loader.js?v=2"></script>
   <script src="./js/quiz-engine.js?v=2"></script>
   <script src="./js/battle-core.js?v=25"></script>
-  <script src="./js/battle-combo.js?v=16"></script>
+  <script src="./js/battle-rules.js?v=1"></script>
+  <script src="./js/battle-client.js?v=1"></script>
+  <script src="./js/battle-combo.js?v=22"></script>
   <script>
     (async function () {
-      const FLOW = window.BattleCombo;
-      let enemy, core = null;
+      const FLOW = window.ComboBattle;
+      let enemy;
       try {
         await EnemyLoader.loadAll();
         await QuizEngine.load();
@@ -182,11 +189,45 @@
         return;
       }
       enemy = EnemyLoader.random();
-      core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
+      // 単一エントリ(ComboBattle.start)に集約。warmup/core生成はstart内で実施。
+      // 開始: Step6デモ — BattleClient(モックサーバ)があれば結果を送信し、サーバ確定値をログ表示。
       document.getElementById("bv-start").addEventListener("click", function () {
-        if (window.ComboEngine && window.ComboEngine.warmup) window.ComboEngine.warmup(); // 音声を早めに解錠・安定化
-        core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
-        FLOW.run(core);
+        var picked = document.querySelector('input[name="combo-mode"]:checked');
+        var autoAdvance = !!picked && picked.value === "auto"; // セット間の自動送り
+        if (!(window.BattleClient && window.BattleRules)) {
+          FLOW.start({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP, autoAdvance: autoAdvance });
+          return;
+        }
+        var core = BattleCore.create({ enemy: enemy, playerHp: FLOW.CONFIG.PLAYER_HP });
+        var enemyMaxHp = core.state.enemyHp;
+        var mock = window.BattleClient.createMock({
+          params: window.BattleRules.paramsFromConfig(FLOW.CONFIG),
+          enemy: { name: enemy.name, hp: enemyMaxHp },
+          playerHp: FLOW.CONFIG.PLAYER_HP,
+          bounds: { minMsPerSet: 200, maxMsPerSet: 600000 }
+        });
+        var sessionP = mock.start({ spotId: "poc-combo" }); // awaitしない(warmupを妨げない)
+        FLOW.start({
+          core: core,
+          autoAdvance: autoAdvance,
+          onResult: function (result) {
+            sessionP.then(function (session) {
+              return mock.submitResult({ sessionId: session.sessionId, nonce: session.nonce, result: result });
+            }).then(function (conf) {
+              var log = document.getElementById("bv-log");
+              var pEl = document.createElement("p");
+              if (conf.accepted) {
+                pEl.textContent = "🛰 サーバ確定: outcome=" + conf.outcome +
+                  " / 与ダメ" + conf.authoritative.damageDealt + "・被ダメ" + conf.authoritative.damageTaken +
+                  " / valid=" + conf.valid + (conf.flags && conf.flags.length ? " / flags=" + conf.flags.join(", ") : "");
+              } else {
+                pEl.textContent = "🛰 サーバ拒否: " + conf.reason;
+              }
+              if (log) log.appendChild(pEl);
+              console.log("[combo mock server] 確定:", conf, " / クライアント申告:", result);
+            });
+          }
+        });
       });
       document.getElementById("bv-restart").addEventListener("click", function () {
         location.reload();
