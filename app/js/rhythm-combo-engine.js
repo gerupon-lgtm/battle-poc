@@ -1822,6 +1822,7 @@
     var _nC = $("notes"); if (_nC) _nC.innerHTML = ""; // 前セットの残ノーツを消す
     function at(beatIndex, fn) { comboTimers.push(setTimeout(fn, Math.max(0, (startTime + beatIndex * beat - A.currentTime) * 1000))); }
     for (let i = 0; i < total; i++) {
+      if (i >= defStart && i < defEnd) continue; // 防御プレイ中は拍ガイド(四分音符の頭)を光らせない=タップ(ノーツ到達)のみで光らせる
       (function (bi) { at(bi, function () { updateVisualBeatGuide(bi % 4, true); comboTimers.push(setTimeout(function () { updateVisualBeatGuide(bi % 4, false); }, 110)); }); })(i);
     }
     for (const h of atkHits.concat(defHits)) {
