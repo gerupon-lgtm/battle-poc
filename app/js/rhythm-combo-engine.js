@@ -1840,6 +1840,7 @@
     const marker = opts.marker || null;
     const atkWin = { perfectMs: SETTINGS.attackPerfectMs, goodMs: SETTINGS.attackGoodMs };
     const tally = { perfect: 0, good: 0, defMisses: 0 };
+    const defFlashAnims = []; // 防御: 判定ラインをノーツ到達(=タップ時)に光らせるアニメ(終了時にcancel)
     let _atkOffSum = 0, _atkOffN = 0; // 診断: 攻撃タップの平均オフセット
     const usedAtk = new Set();
     const calMs = (typeof state.calibrationOffsetMs === "number") ? state.calibrationOffsetMs : 0;
@@ -1856,6 +1857,7 @@
       comboActiveAbort = null;
       comboClear();
       resetVisualBeatGuide();
+      try { defFlashAnims.forEach(function (a) { a.cancel(); }); } catch (_) {}
       if (countEl) countEl.hidden = true;
       if (L) L.removeEventListener("pointerdown", onTap);
       defNotes.forEach(function (r) { if (r.el) r.el.remove(); });
@@ -1902,6 +1904,7 @@
     const hitOffset = appearSec / (appearSec + exitSec);
     const timelineNow = (document.timeline && Number.isFinite(document.timeline.currentTime)) ? document.timeline.currentTime : performance.now();
     const defNotes = [];
+    const hitFlashEl = L ? L.querySelector(".hit-line-flash") : null; // 判定ラインの発光体
     for (const n of defChart) {
       const globalBeat = defStart + n.beat;
       const noteTimeSec = globalBeat * beat;
@@ -1924,6 +1927,22 @@
       } catch (_) {}
       const rec = { el: motionEl, atMs: startWallMs + noteTimeSec * 1000, gbeat: globalBeat, hit: false, missed: false };
       defNotes.push(rec);
+      // 防御: このノーツが判定線に重なる瞬間(=タップタイミング)に判定ラインを光らせる。
+      //   色は落下ノーツに合わせ(頭=黄/裏=水色/シャッフル=紫)、大きい落下物(accent)は強く光る。
+      if (hitFlashEl) {
+        try {
+          const _fc = HITLINE_FLASH_COLORS[n.phase] || HITLINE_FLASH_COLORS.head;
+          const _fpeak = n.accent ? 1 : 0.8;
+          const _fsh = (n.accent ? "0 0 46px 14px " : "0 0 28px 7px ") + _fc.glow;
+          const _fdur = Math.max(90, Math.min(beatMs * 0.5, 180));
+          const _fa = hitFlashEl.animate([
+            { backgroundColor: _fc.color, boxShadow: _fsh, opacity: _fpeak, transform: "scaleX(1)", offset: 0 },
+            { backgroundColor: _fc.color, boxShadow: _fsh, opacity: 0, transform: "scaleX(0.97)", offset: 1 },
+          ], { duration: _fdur, delay: (rec.atMs - timelineNow), easing: "ease-out", fill: "none" });
+          _fa.startTime = timelineNow;
+          defFlashAnims.push(_fa);
+        } catch (_) {}
+      }
       comboTimers.push(setTimeout(function () {
         if (!rec.hit && !rec.missed) { rec.missed = true; tally.defMisses++; if (rec.el) rec.el.remove(); floatJudge("miss", "Damage!"); if (opts.onDefenseMiss && opts.onDefenseMiss()) registerDecision(Math.round(rec.gbeat)); }
       }, Math.max(0, (rec.atMs + SETTINGS.goodMs) - performance.now())));
