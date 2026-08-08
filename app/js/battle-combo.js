@@ -307,7 +307,7 @@
     setupControls(core);
 
     while (!core.isOver()) {
-      if (core.toast) core.toast("はしけん出題！", "quiz");
+      if (core.toast) core.toast("クイズ出題！", "quiz");
       const quiz = providers.getQuiz(CONFIG.QUIZ_CHOICES);
       const ans = await askQuiz(core, quiz, {
         revealExplanation: false,
