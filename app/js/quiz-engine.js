@@ -20,7 +20,7 @@
   }
 
   async function load(path) {
-    const res = await fetch(path || "./data/hashiken-question-set.json");
+    const res = await fetch(path || "./data/question-set.json");
     const data = await res.json();
     // 単一選択かつ answer が1つの設問のみ採用
     pool = data.questions.filter(
