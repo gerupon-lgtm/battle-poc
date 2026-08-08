@@ -1,0 +1,2087 @@
+{
+  "questionSetId": "general-knowledge-100-quiz",
+  "version": "1.0.0",
+  "locked": true,
+  "updatedAt": "2026-08-08",
+  "settings": {
+    "questionCount": 100,
+    "passingScore": 70,
+    "difficulty": "standard",
+    "randomizeQuestions": true,
+    "randomizeChoices": true,
+    "showExplanationAfterAnswer": true,
+    "categoryDistributionMode": "weighted",
+    "categoryDistribution": [
+      {
+        "categoryId": "C-001",
+        "weight": 1,
+        "priority": 1
+      },
+      {
+        "categoryId": "C-002",
+        "weight": 1,
+        "priority": 1
+      },
+      {
+        "categoryId": "C-003",
+        "weight": 1,
+        "priority": 1
+      },
+      {
+        "categoryId": "C-004",
+        "weight": 1,
+        "priority": 1
+      },
+      {
+        "categoryId": "C-005",
+        "weight": 1,
+        "priority": 1
+      },
+      {
+        "categoryId": "C-006",
+        "weight": 1,
+        "priority": 1
+      }
+    ]
+  },
+  "categories": [
+    {
+      "id": "C-001",
+      "name": "政治・経済",
+      "description": "政治・経済に関する一般常識",
+      "weight": 1
+    },
+    {
+      "id": "C-002",
+      "name": "歴史",
+      "description": "日本史・世界史に関する一般常識",
+      "weight": 1
+    },
+    {
+      "id": "C-003",
+      "name": "地理",
+      "description": "日本地理・世界地理に関する一般常識",
+      "weight": 1
+    },
+    {
+      "id": "C-004",
+      "name": "科学・自然",
+      "description": "理科・科学・自然環境に関する一般常識",
+      "weight": 1
+    },
+    {
+      "id": "C-005",
+      "name": "国語・文学",
+      "description": "漢字・ことわざ・文学に関する一般常識",
+      "weight": 1
+    },
+    {
+      "id": "C-006",
+      "name": "社会・文化",
+      "description": "社会制度・文化・芸術に関する一般常識",
+      "weight": 1
+    }
+  ],
+  "questions": [
+    {
+      "id": "Q001",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の国会の二院制は、衆議院ともう一つは何院ですか？",
+      "choices": [
+        "貴族院",
+        "元老院",
+        "参議院",
+        "立法院"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "日本の国会は衆議院と参議院の二院制を採用しています。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q002",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本国憲法において、主権は誰にあると定められていますか？",
+      "choices": [
+        "天皇",
+        "国民",
+        "内閣総理大臣",
+        "国会"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "日本国憲法は「国民主権」を基本原則の一つとしています。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q003",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の紙幣（日本銀行券）を発行しているのはどこですか？",
+      "choices": [
+        "財務省",
+        "造幣局",
+        "日本銀行",
+        "内閣府"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "紙幣（日本銀行券）は日本銀行が発行し、硬貨（貨幣）は政府（造幣局）が製造・発行します。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q004",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "GDPとは何の略称ですか？",
+      "choices": [
+        "国内総生産",
+        "国民総所得",
+        "国民総生産",
+        "国内純生産"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "GDPはGross Domestic Productの略で、国内総生産を指します。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q005",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "国連（国際連合）の現在の本部はどこにありますか？",
+      "choices": [
+        "ジュネーブ",
+        "ニューヨーク",
+        "ロンドン",
+        "パリ"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "国際連合の本部はアメリカ合衆国のニューヨークにあります。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q006",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "株式会社における最高意思決定機関は何ですか？",
+      "choices": [
+        "取締役会",
+        "監査役会",
+        "株主総会",
+        "経営会議"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "株式会社の最高意思決定機関は株主総会です。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q007",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本で選挙権が得られるのは何歳からですか？",
+      "choices": [
+        "16歳",
+        "18歳",
+        "20歳",
+        "22歳"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "2016年の公職選挙法改正により、選挙権年齢は満18歳以上に引き下げられました。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q008",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "インフレーションとは、物価が継続的にどうなる状態ですか？",
+      "choices": [
+        "下落する",
+        "変動しない",
+        "上昇する",
+        "乱高下する"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "インフレーション（インフレ）は物価が継続的に上昇し、貨幣価値が下がる状態です。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q009",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "裁判を三回まで受けることができる日本の制度を何といいますか？",
+      "choices": [
+        "三権分立",
+        "三審制",
+        "陪審制",
+        "控訴制"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "日本の裁判制度は、第一審、控訴審、上告審の三回まで裁判を受けられる三審制です。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q010",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "国や地方公共団体が1年間に得る収入の見積もりを何といいますか？",
+      "choices": [
+        "決算",
+        "予算",
+        "税収",
+        "国債"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "1会計年度の収入と支出の見積もりを予算といいます。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q011",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "G7（主要国首脳会議）に含まれない国はどれですか？",
+      "choices": [
+        "日本",
+        "カナダ",
+        "中国",
+        "イタリア"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "G7はフランス、アメリカ、イギリス、ドイツ、日本、イタリア、カナダの7か国です。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q012",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "国会が内閣を信任しないという意思を示す決議を何といいますか？",
+      "choices": [
+        "不信任決議",
+        "弾劾決議",
+        "問責決議",
+        "違憲立法院"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "内閣不信任決議が可決された場合、内閣は10日以内に衆議院を解散するか、総辞職しなければなりません。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q013",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本で消費税が初めて導入された時の税率は何％ですか？",
+      "choices": [
+        "3％",
+        "5％",
+        "8％",
+        "10％"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "日本の消費税は1989年に税率3％で導入されました。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q014",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "企業が自社の社会的責任を果たすことを指す言葉の略称は？",
+      "choices": [
+        "CEO",
+        "CSR",
+        "NPO",
+        "NGO"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "CSR（Corporate Social Responsibility）は企業の社会的責任と訳されます。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q015",
+      "category": "政治・経済",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "需要と供給のバランスで価格が決まる経済体制を何といいますか？",
+      "choices": [
+        "計画経済",
+        "社会主義経済",
+        "市場経済",
+        "統制経済"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "市場経済（資本主義経済）では、価格は市場の需要と供給のバランスで決まります。",
+      "tags": [
+        "政治・経済"
+      ]
+    },
+    {
+      "id": "Q016",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「鳴くよウグイス平安京」の語呂合わせで知られる、平安京遷都は何年ですか？",
+      "choices": [
+        "710年",
+        "794年",
+        "1192年",
+        "1603年"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "794年に桓武天皇によって平安京に都が移されました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q017",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本で初めて武家政権を樹立し、鎌倉幕府を開いた人物は誰ですか？",
+      "choices": [
+        "平清盛",
+        "源頼朝",
+        "足利尊氏",
+        "徳川家康"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "源頼朝が1192年（諸説あり）に征夷大将軍に任じられ、鎌倉幕府を開きました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q018",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "1582年、織田信長が家臣の明智光秀に討たれた事件を何といいますか？",
+      "choices": [
+        "本能寺の変",
+        "関ヶ原の戦い",
+        "大坂の陣",
+        "桜田門外の変"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "京都の本能寺に滞在していた織田信長が明智光秀の謀反により自害した事件です。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q019",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "江戸時代にキリスト教の信仰を禁じるために行われた、絵や木彫りの像を踏ませる政策は何ですか？",
+      "choices": [
+        "踏み絵",
+        "宗門改め",
+        "キリシタン狩り",
+        "鎖国"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "キリスト教徒を見つけ出すために、キリストやマリアが描かれた絵（踏み絵）を踏ませました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q020",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "1867年、江戸幕府第15代将軍徳川慶喜が政権を朝廷に返上した出来事を何といいますか？",
+      "choices": [
+        "王政復古",
+        "大政奉還",
+        "版籍奉還",
+        "廃藩置県"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "大政奉還により、260年余り続いた江戸幕府の支配と武家政治が幕を閉じました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q021",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "世界初の原子爆弾が投下された都市は広島とどこですか？",
+      "choices": [
+        "東京",
+        "大阪",
+        "長崎",
+        "沖縄"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "1945年8月6日に広島、8月9日に長崎に原子爆弾が投下されました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q022",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "フランス革命中に起きた、民衆が襲撃した牢獄の名前は何ですか？",
+      "choices": [
+        "タワー・オブ・ロンドン",
+        "バスティーユ牢獄",
+        "アルカトラズ",
+        "アウシュビッツ"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "1789年7月14日のバスティーユ牢獄襲撃がフランス革命の発端とされています。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q023",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "アメリカ合衆国の初代大統領は誰ですか？",
+      "choices": [
+        "リンカーン",
+        "ワシントン",
+        "ジェファーソン",
+        "ルーズベルト"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "ジョージ・ワシントンが1789年に初代アメリカ合衆国大統領に就任しました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q024",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "古代エジプトの王の墓とされる建造物を何といいますか？",
+      "choices": [
+        "パルテノン神殿",
+        "コロッセオ",
+        "ピラミッド",
+        "タージ・マハル"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "ピラミッドは古代エジプトのファラオ（王）の墓とされています。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q025",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "明治時代、富国強兵を目指し、西欧の技術や文化を積極的に取り入れた動きを何といいますか？",
+      "choices": [
+        "文明開化",
+        "殖産興業",
+        "大正デモクラシー",
+        "自由民権運動"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "文明開化により、洋服、レンガ造りの建築、鉄道などが日本に普及しました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q026",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ルネサンス期に『モナ・リザ』や『最後の晩餐』を描いた芸術家は誰ですか？",
+      "choices": [
+        "ミケランジェロ",
+        "ラファエロ",
+        "レオナルド・ダ・ヴィンチ",
+        "ピカソ"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "レオナルド・ダ・ヴィンチはルネサンスを代表する万能の天才として知られます。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q027",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の旧石器時代から縄文時代にかけて使われた、表面に縄の模様がある土器を何といいますか？",
+      "choices": [
+        "弥生土器",
+        "縄文土器",
+        "須恵器",
+        "土師器"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "縄文土器は、粘土に縄を転がしてつけた模様（縄目）が特徴です。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q028",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日清戦争後に結ばれ、日本が台湾や遼東半島を獲得した条約は何ですか？",
+      "choices": [
+        "ポーツマス条約",
+        "サンフランシスコ平和条約",
+        "下関条約",
+        "日米修好通商条約"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "1895年に下関条約が結ばれました。その後、三国干渉により遼東半島は返還しました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q029",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「我思う、ゆえに我あり」という言葉を残したフランスの哲学者は誰ですか？",
+      "choices": [
+        "カント",
+        "デカルト",
+        "ニーチェ",
+        "ソクラテス"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "ルネ・デカルトの著書『方法序説』に記された有名な命題です。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q030",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "中国の三国時代、蜀（しょく）を建国した人物は誰ですか？",
+      "choices": [
+        "曹操",
+        "孫権",
+        "劉備",
+        "諸葛亮"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "劉備が蜀漢を建国しました。曹操は魏（の基礎）、孫権は呉を建国しました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q031",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "1989年に崩壊し、東西冷戦終結の象徴となった壁は何と呼ばれていましたか？",
+      "choices": [
+        "嘆きの壁",
+        "ベルリンの壁",
+        "万里の長城",
+        "鉄のカーテン"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "東西ドイツを分断していたベルリンの壁が1989年に崩壊しました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q032",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "聖徳太子が制定した、役人の心構えを示した法律を何といいますか？",
+      "choices": [
+        "大宝律令",
+        "十七条の憲法",
+        "御成敗式目",
+        "武家諸法度"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "推古天皇の時代、聖徳太子は冠位十二階や十七条の憲法を制定しました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q033",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "中大兄皇子と中臣鎌足が蘇我氏を倒し、天皇中心の政治を取り戻した改革を何といいますか？",
+      "choices": [
+        "大化の改新",
+        "建武の新政",
+        "享保の改革",
+        "寛政の改革"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "645年に始まる大化の改新により、公地公民制などが確立されました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q034",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "第一回オリンピック近代大会が開催された都市はどこですか？",
+      "choices": [
+        "パリ",
+        "ロンドン",
+        "アテネ",
+        "ローマ"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "1896年にギリシャのアテネで第1回近代オリンピックが開催されました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q035",
+      "category": "歴史",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "豊臣秀吉が行った、全国の田畑の面積や質を測り、収穫量を予想する政策を何といいますか？",
+      "choices": [
+        "刀狩",
+        "太閤検地",
+        "座の廃止",
+        "楽市・楽座"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "太閤検地により、土地の所有者と石高が台帳（検地帳）に記録されました。",
+      "tags": [
+        "歴史"
+      ]
+    },
+    {
+      "id": "Q036",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の都道府県の中で、最も面積が広いのはどこですか？",
+      "choices": [
+        "岩手県",
+        "長野県",
+        "北海道",
+        "新潟県"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "北海道が最も面積が広く、日本の総面積の約22%を占めます。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q037",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "世界で最も長い川は何ですか？",
+      "choices": [
+        "アマゾン川",
+        "ナイル川",
+        "ミシシッピ川",
+        "長江"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "ナイル川（アフリカ）が世界最長とされています。（アマゾン川とする説もあります）",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q038",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の最南端にある島は何ですか？",
+      "choices": [
+        "与那国島",
+        "沖ノ鳥島",
+        "南鳥島",
+        "択捉島"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "日本の最南端は東京都小笠原村に属する沖ノ鳥島です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q039",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "世界で最も面積が小さい国（独立国）はどこですか？",
+      "choices": [
+        "モナコ",
+        "サンマリノ",
+        "バチカン市国",
+        "ナウル"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "バチカン市国はローマ市内にある、世界最小の独立国です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q040",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "本州と四国を結ぶ「本州四国連絡橋」のうち、岡山県と香川県を結ぶルートは何ですか？",
+      "choices": [
+        "瀬戸大橋",
+        "明石海峡大橋",
+        "しまなみ海道",
+        "大鳴門橋"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "岡山県倉敷市と香川県坂出市を結ぶルートが瀬戸大橋（児島・坂出ルート）です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q041",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "赤道が通っていない大陸は次のうちどれですか？",
+      "choices": [
+        "アフリカ大陸",
+        "南アメリカ大陸",
+        "オーストラリア大陸",
+        "ユーラシア大陸（島嶼部）"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "オーストラリア大陸は南半球にあり、赤道は通っていません。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q042",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本で最も高い山は富士山ですが、2番目に高い山は何ですか？",
+      "choices": [
+        "奥穂高岳",
+        "北岳",
+        "間ノ岳",
+        "槍ヶ岳"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "山梨県にある北岳（標高3,193m）が日本で2番目に高い山です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q043",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "アメリカ合衆国の首都はどこですか？",
+      "choices": [
+        "ニューヨーク",
+        "ロサンゼルス",
+        "ワシントンD.C.",
+        "シカゴ"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "アメリカの首都はワシントンD.C.です。ニューヨークは最大の都市ですが首都ではありません。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q044",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ヨーロッパ連合（EU）の共通通貨は何ですか？",
+      "choices": [
+        "ドル",
+        "ポンド",
+        "ユーロ",
+        "フラン"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "ユーロはEU加盟国の多くで導入されている単一通貨です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q045",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本にある世界自然遺産のうち、鹿児島県に位置し、縄文杉で有名な島はどこですか？",
+      "choices": [
+        "屋久島",
+        "奄美大島",
+        "西表島",
+        "知床"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "屋久島は1993年に日本初の世界自然遺産として登録されました。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q046",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "地図上の等高線の間隔が狭いところは、実際の地形ではどのようになっていますか？",
+      "choices": [
+        "平坦である",
+        "傾斜が急である",
+        "傾斜が緩やかである",
+        "くぼ地である"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "等高線が密になっている（間隔が狭い）場所は、傾斜が急な斜面を表します。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q047",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "アフリカ大陸の北部に広がる世界最大の砂漠は何ですか？",
+      "choices": [
+        "ゴビ砂漠",
+        "サハラ砂漠",
+        "カラハリ砂漠",
+        "タクラマカン砂漠"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "サハラ砂漠はアフリカ大陸北部に広がる世界最大の砂漠です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q048",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の気候区分で、夏は雨が少なく乾燥し、冬も比較的温暖な気候を何といいますか？",
+      "choices": [
+        "太平洋側気候",
+        "日本海側気候",
+        "瀬戸内海式気候",
+        "内陸性気候"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "瀬戸内海式気候は、中国山地と四国山地に挟まれているため降水量が年間を通して少なめです。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q049",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "オーストラリアの固有種であるコアラの主食となる植物は何ですか？",
+      "choices": [
+        "笹",
+        "ユーカリ",
+        "バオバブ",
+        "マングローブ"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "コアラはユーカリの葉を主食としています。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q050",
+      "category": "地理",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ブラジルの公用語は何語ですか？",
+      "choices": [
+        "スペイン語",
+        "英語",
+        "ポルトガル語",
+        "フランス語"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "南米の多くの国はスペイン語ですが、ブラジルはポルトガル語が公用語です。",
+      "tags": [
+        "地理"
+      ]
+    },
+    {
+      "id": "Q051",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "水（H2O）が凍って氷になる温度（融点・凝固点）は摂氏何度ですか？",
+      "choices": [
+        "-10度",
+        "0度",
+        "10度",
+        "100度"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "純粋な水は1気圧のもとで摂氏0度で凍ります。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q052",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "植物が太陽の光を浴びて二酸化炭素と水からデンプンなどを作る働きを何といいますか？",
+      "choices": [
+        "呼吸",
+        "蒸散",
+        "光合成",
+        "発酵"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "光合成によって有機物が作られ、酸素が放出されます。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q053",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "地球を取り巻く大気の中で、最も割合が多い気体は何ですか？",
+      "choices": [
+        "酸素",
+        "二酸化炭素",
+        "窒素",
+        "水素"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "地球の大気は約78%が窒素、約21%が酸素です。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q054",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "太陽系で最も大きい惑星は何ですか？",
+      "choices": [
+        "地球",
+        "火星",
+        "木星",
+        "土星"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "木星は太陽系の中で最大の惑星で、ガスを主成分とする巨大ガス惑星です。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q055",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "人間の血液の中で、酸素を全身に運ぶ役割を持つ細胞は何ですか？",
+      "choices": [
+        "白血球",
+        "赤血球",
+        "血小板",
+        "血漿"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "赤血球に含まれるヘモグロビンが酸素と結びついて全身に運びます。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q056",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "音の伝わる速さ（音速）は、空気中（気温15度）で秒速約何メートルですか？",
+      "choices": [
+        "約340m",
+        "約1,000m",
+        "約3,000m",
+        "約30万km"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "空気中の音速は秒速約340m（時速約1200km）です。秒速30万kmは光の速さです。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q057",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "地震の規模（エネルギーの大きさ）を表す数値を何といいますか？",
+      "choices": [
+        "震度",
+        "マグニチュード",
+        "ガル",
+        "シーベルト"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "マグニチュードは地震そのものの規模を、震度は各地点での揺れの大きさを表します。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q058",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "物質が液体から気体に変わる現象を何といいますか？",
+      "choices": [
+        "融解",
+        "凝固",
+        "蒸発（気化）",
+        "昇華"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "液体が気体になることを気化（蒸発・沸騰）といいます。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q059",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "DNAは何の略称ですか？",
+      "choices": [
+        "デオキシリボ核酸",
+        "リボ核酸",
+        "アミノ酸",
+        "タンパク質"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "DNAはDeoxyribonucleic acid（デオキシリボ核酸）の略で、遺伝情報の本体です。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q060",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "酸性かアルカリ性かを調べるために使われる、酸性で赤色、アルカリ性で青色になる試験紙は何ですか？",
+      "choices": [
+        "pH試験紙",
+        "リトマス紙",
+        "フェノールフタレイン紙",
+        "ヨウ素デンプン紙"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "リトマス試験紙は、酸性で赤、アルカリ性で青に変化します。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q061",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "哺乳類の中で、唯一空を飛ぶことができる動物は何ですか？",
+      "choices": [
+        "ムササビ",
+        "モモンガ",
+        "コウモリ",
+        "ペンギン"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "コウモリは自力で羽ばたいて飛ぶことができる唯一の哺乳類です。（ムササビは滑空のみ）",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q062",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "地球の自転によって生じる、見かけ上の力のことを何といいますか？",
+      "choices": [
+        "遠心力",
+        "コリオリの力",
+        "万有引力",
+        "浮力"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "コリオリの力により、北半球では進行方向に対して右向きに力が働いているように見えます。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q063",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "コンピュータの脳とも呼ばれ、計算や制御を行う中央処理装置の略称は何ですか？",
+      "choices": [
+        "HDD",
+        "RAM",
+        "CPU",
+        "GPU"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "CPU（Central Processing Unit）はコンピュータの中心的な処理装置です。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q064",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "元素記号「Fe」が表す元素は何ですか？",
+      "choices": [
+        "金",
+        "銀",
+        "鉄",
+        "銅"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "Feは鉄（Ferrum）の元素記号です。金はAu、銀はAg、銅はCuです。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q065",
+      "category": "科学・自然",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "光の三原色は赤、緑と、もう一つは何色ですか？",
+      "choices": [
+        "黄",
+        "青",
+        "黒",
+        "白"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "光の三原色は赤（Red）、緑（Green）、青（Blue）です。",
+      "tags": [
+        "科学・自然"
+      ]
+    },
+    {
+      "id": "Q066",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ことわざ「犬も歩けば（　　）にあたる」。カッコに入る言葉は何ですか？",
+      "choices": [
+        "石",
+        "棒",
+        "壁",
+        "人"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "「犬も歩けば棒にあたる」は、何か行動を起こせば災難に遭う、または思わぬ幸運に出会うという意味です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q067",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "『吾輩は猫である』『坊っちゃん』などを書いた近代日本の文豪は誰ですか？",
+      "choices": [
+        "森鷗外",
+        "芥川龍之介",
+        "夏目漱石",
+        "太宰治"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "夏目漱石の代表作です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q068",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「矛盾」という言葉の語源となった中国の古典エピソードで、売られていた武器は盾と何ですか？",
+      "choices": [
+        "剣",
+        "弓",
+        "矛（ほこ）",
+        "槍（やり）"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "「どんな盾も突き通す矛」と「どんな矛も防ぐ盾」を売っていた商人の話（韓非子）に由来します。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q069",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "俳句において、五・七・五の区切りの途中で意味が切れることを何といいますか？",
+      "choices": [
+        "季語",
+        "切れ字",
+        "句またがり",
+        "字余り"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "「や」「かな」「けり」などの切れ字を用いて、句の途中で意味を切る技法があります。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q070",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "『源氏物語』の作者は誰ですか？",
+      "choices": [
+        "清少納言",
+        "紫式部",
+        "小野小町",
+        "和泉式部"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "紫式部が平安時代中期に執筆した長編物語です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q071",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "四字熟語「温故知新」の「温故」とはどういう意味ですか？",
+      "choices": [
+        "昔の事をたずね求めること",
+        "新しい知識を得ること",
+        "古いものを捨てること",
+        "温かい心を持つこと"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "「温故知新」は、昔の事をたずね求め（温故）、そこから新しい知識や道理を得る（知新）という意味です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q072",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "太宰治の小説『走れメロス』で、メロスが身代わりに置いてきた友人の名前は何ですか？",
+      "choices": [
+        "セリヌンティウス",
+        "ディオニス",
+        "フィロストラトス",
+        "ソクラテス"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "メロスは親友の石工セリヌンティウスを人質として王に預けました。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q073",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「五十歩百歩」と同じ意味のことわざはどれですか？",
+      "choices": [
+        "どんぐりの背比べ",
+        "月とすっぽん",
+        "急がば回れ",
+        "猿も木から落ちる"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "どちらも大差なく、似たり寄ったりであるという意味です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q074",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "漢字の「凸」と「凹」。画数が多いのはどちらですか？",
+      "choices": [
+        "凸",
+        "凹",
+        "どちらも同じ（5画）",
+        "どちらも同じ（6画）"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "「凸」も「凹」も画数は5画で同じです。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q075",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「気が置けない人」の正しい意味はどれですか？",
+      "choices": [
+        "油断できない人",
+        "気配りができない人",
+        "遠慮する必要がなく、心から打ち解けられる人",
+        "気まずい雰囲気の人"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "「気が置けない」は、気配りや遠慮をする必要がない親しい間柄を指す肯定的な言葉です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q076",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "イギリスの劇作家シェイクスピアの四大悲劇に含まれないものはどれですか？",
+      "choices": [
+        "ハムレット",
+        "マクベス",
+        "リア王",
+        "ロミオとジュリエット"
+      ],
+      "answer": [
+        3
+      ],
+      "explanation": "四大悲劇は『ハムレット』『マクベス』『オセロ』『リア王』です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q077",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "『枕草子』の冒頭「春はあけぼの」。では「夏」は何が良いと書かれていますか？",
+      "choices": [
+        "夕暮れ",
+        "夜",
+        "早朝",
+        "昼"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "「夏は夜」と続き、月のころや蛍の飛び交う情景が美しいと記されています。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q078",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「杞憂（きゆう）」の意味として正しいものはどれですか？",
+      "choices": [
+        "大喜びすること",
+        "取り越し苦労をすること",
+        "深く悲しむこと",
+        "突然の出来事に驚くこと"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "中国の杞（き）の国の人が、天が落ちてこないかと無用の心配をした故事に由来します。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q079",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本最古の和歌集は何ですか？",
+      "choices": [
+        "古今和歌集",
+        "万葉集",
+        "新古今和歌集",
+        "百人一首"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "奈良時代末期に成立したとされる『万葉集』が日本最古の和歌集です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q080",
+      "category": "国語・文学",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「一期一会」という言葉は、もともとどのような文化から生まれた言葉ですか？",
+      "choices": [
+        "武士道",
+        "歌舞伎",
+        "茶道",
+        "相撲"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "千利休の教えに由来し、「茶会に臨む際は一生に一度の出会いと考えて誠意を尽くす」という茶道の心得です。",
+      "tags": [
+        "国語・文学"
+      ]
+    },
+    {
+      "id": "Q081",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "オリンピックの五輪のマークの5つの輪は、何を表していますか？",
+      "choices": [
+        "5つの大洋",
+        "5つの大陸",
+        "5つの精神",
+        "5つのスポーツ理念"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "青・黄・黒・緑・赤の5つの輪は、世界の五大陸（ヨーロッパ、南北アメリカ、アフリカ、アジア、オセアニア）を表しています。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q082",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「SDGs」とは、何に関する国際目標ですか？",
+      "choices": [
+        "持続可能な開発",
+        "軍縮と平和",
+        "宇宙開発",
+        "世界遺産保護"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "Sustainable Development Goals（持続可能な開発目標）の略称です。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q083",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の伝統芸能で、顔に「隈取（くまどり）」と呼ばれる独特の化粧をするのは何ですか？",
+      "choices": [
+        "能",
+        "狂言",
+        "歌舞伎",
+        "文楽"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "歌舞伎特有の化粧法で、役柄の性格や感情を色や線で表現します。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q084",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ノーベル賞の部門に存在しないものはどれですか？",
+      "choices": [
+        "物理学賞",
+        "平和賞",
+        "数学賞",
+        "文学賞"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "数学賞はノーベル賞にありません。数学分野ではフィールズ賞などが有名です。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q085",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ベートーヴェンの交響曲第9番（第九）で歌われる有名な合唱曲の題名は何ですか？",
+      "choices": [
+        "歓喜の歌",
+        "威風堂々",
+        "ハレルヤ",
+        "アヴェ・マリア"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "シラーの詩『歓喜に寄す』をもとにした「歓喜の歌」が第4楽章で歌われます。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q086",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "UNESCO（国連教育科学文化機関）が登録する世界遺産には、「文化遺産」「自然遺産」ともう一つは何ですか？",
+      "choices": [
+        "歴史遺産",
+        "複合遺産",
+        "無形遺産",
+        "記憶遺産"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "文化遺産と自然遺産の両方の価値を兼ね備えたものを「複合遺産」と呼びます。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q087",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "野球で、打者が一度の試合で単打、二塁打、三塁打、本塁打のすべてを打つことを何といいますか？",
+      "choices": [
+        "グランドスラム",
+        "サイクルヒット",
+        "完全試合",
+        "トリプルプレー"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "サイクルヒット（サイクル安打）と呼びます。グランドスラムは満塁本塁打です。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q088",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "サッカーの試合で、1人の選手が1試合に3得点以上挙げることを何といいますか？",
+      "choices": [
+        "ハットトリック",
+        "ゴールデンスコア",
+        "スリーポイント",
+        "パーフェクト"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "もともとはクリケットの用語に由来し、サッカーなどで3得点することをハットトリックと呼びます。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q089",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の国花として、一般的に桜とともに親しまれている花は何ですか？",
+      "choices": [
+        "バラ",
+        "ユリ",
+        "キク",
+        "梅"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "日本には法定の国花はありませんが、慣習的に桜と菊が国花として扱われます。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q090",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "ゴッホの有名な絵画で、夜空にうねるような星々が描かれている作品のタイトルは何ですか？",
+      "choices": [
+        "ひまわり",
+        "星月夜",
+        "夜のカフェテラス",
+        "叫び"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "『星月夜（The Starry Night）』はフィンセント・ファン・ゴッホの代表作の一つです。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q091",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "国際オリンピック委員会（IOC）の本部がある国はどこですか？",
+      "choices": [
+        "ギリシャ",
+        "アメリカ",
+        "スイス",
+        "フランス"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "IOCの本部はスイスのローザンヌにあります。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q092",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の法定祝日で、「山の日」は何月何日ですか？",
+      "choices": [
+        "7月20日",
+        "8月11日",
+        "9月23日",
+        "11月3日"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "「山に親しむ機会を得て、山の恩恵に感謝する」として2016年から8月11日が山の日となりました。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q093",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "相撲において、最高位である「横綱」に次ぐ階級は何ですか？",
+      "choices": [
+        "大関",
+        "関脇",
+        "小結",
+        "前頭"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "横綱の下は大関、その下が関脇、小結となります。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q094",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "映画の賞である「アカデミー賞」が授与される国はどこですか？",
+      "choices": [
+        "フランス",
+        "イギリス",
+        "アメリカ",
+        "イタリア"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "アカデミー賞（オスカー）は、アメリカ合衆国の映画芸術科学アカデミーが主催する映画賞です。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q095",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "「国民の三大義務」とは、教育の義務、勤労の義務と、もう一つは何ですか？",
+      "choices": [
+        "兵役の義務",
+        "納税の義務",
+        "投票の義務",
+        "遵守の義務"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "日本国憲法が定める国民の三大義務は、教育・勤労・納税の義務です。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q096",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "将棋の盤面は、縦横それぞれ何マスありますか？",
+      "choices": [
+        "8×8",
+        "9×9",
+        "10×10",
+        "11×11"
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": "将棋盤は縦9段、横9筋の計81マスです。（チェスやオセロは8×8）",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q097",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "インターネット上の住所にあたる「URL」は何の略ですか？",
+      "choices": [
+        "Uniform Resource Locator",
+        "Universal Reference Link",
+        "Unified Routing Logic",
+        "United Resource Library"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "URLはUniform Resource Locatorの略で、ウェブ上のリソースの場所を示します。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q098",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本で最初にユネスコ無形文化遺産に登録された伝統芸能は何ですか？",
+      "choices": [
+        "能楽",
+        "歌舞伎",
+        "文楽",
+        "雅楽"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "2008年（宣言は2001年）に「能楽」が日本で初めて無形文化遺産として登録されました。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q099",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "オーケストラの指揮者が演奏の際に振る棒のことを何といいますか？",
+      "choices": [
+        "タクト",
+        "スティック",
+        "ロッド",
+        "ワンド"
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": "指揮棒のことはドイツ語由来で「タクト（Taktstock）」と呼ばれます。",
+      "tags": [
+        "社会・文化"
+      ]
+    },
+    {
+      "id": "Q100",
+      "category": "社会・文化",
+      "difficulty": "standard",
+      "type": "single",
+      "question": "日本の郵便番号は現在何桁ですか？",
+      "choices": [
+        "5桁",
+        "6桁",
+        "7桁",
+        "8桁"
+      ],
+      "answer": [
+        2
+      ],
+      "explanation": "1998年（平成10年）から、従来の3桁・5桁から7桁の郵便番号に変更されました。",
+      "tags": [
+        "社会・文化"
+      ]
+    }
+  ]
+}
