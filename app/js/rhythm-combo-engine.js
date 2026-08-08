@@ -583,6 +583,13 @@
     updateVisualBeatGuide(-1, false);
   }
 
+  // 拍ガイドのゲージ「全体」(4セグメント全部)を一括で点灯/消灯する。
+  function comboFlashGuideAll(on) {
+    const guide = $("beat-guide");
+    if (guide) for (const step of guide.children) step.classList.toggle("active", !!on);
+    const lane = $("lane"); if (lane) lane.classList.toggle("beat-pulse", !!on);
+  }
+
   function resetDiagnostics() {
     state.debugSessionActive = false;
     state.debugSongStartWallMs = 0;
@@ -1928,14 +1935,14 @@
       } catch (_) {}
       const rec = { el: motionEl, atMs: startWallMs + noteTimeSec * 1000, gbeat: globalBeat, hit: false, missed: false };
       defNotes.push(rec);
-      // 防御: このノーツのタップ時(判定線到達)に、拍ガイドのゲージを該当セグメントで一瞬光らせ、直後に全消灯。
+      // 防御: このノーツのタップ時(判定線到達)に、拍ガイドのゲージ全体を一瞬光らせ、直後に全消灯。
       //   → 頭(四分音符)では光らず、タップすべきタイミングだけ光る。持続ハイライトも残さない。
-      (function (arriveMs, seg) {
+      (function (arriveMs) {
         comboTimers.push(setTimeout(function () {
-          updateVisualBeatGuide(seg, true);
-          comboTimers.push(setTimeout(function () { updateVisualBeatGuide(-1, false); }, 110));
+          comboFlashGuideAll(true);
+          comboTimers.push(setTimeout(function () { comboFlashGuideAll(false); }, 110));
         }, Math.max(0, arriveMs - performance.now())));
-      })(rec.atMs, ((Math.floor(globalBeat) % 4) + 4) % 4);
+      })(rec.atMs);
       // 防御: このノーツが判定線に重なる瞬間(=タップタイミング)に判定ラインを光らせる。
       //   色は落下ノーツに合わせ(頭=黄/裏=水色/シャッフル=紫)、大きい落下物(accent)は強く光る。
       if (hitFlashEl) {
