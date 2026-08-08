@@ -1831,7 +1831,7 @@
     at(0, function () { if (opts.onPhase) opts.onPhase("attack"); });
     at(atkStart, function () { if (countEl) countEl.hidden = true; });
     at(defCountStart, function () { if (decided) return; if (opts.onPhase) opts.onPhase("defense"); });
-    at(defStart, function () { if (countEl) countEl.hidden = true; });
+    at(defStart, function () { if (countEl) countEl.hidden = true; resetVisualBeatGuide(); }); // 防御開始: 固まった拍ガイドを消灯
     // ===== 入力判定・防御ノーツ・集計(段階2) =====
     if (!comboWallSync) comboWallSync = measureAudioWallSync(A, 8); // 初回のみ測定→以降は再利用(セット間でアンカーがブレない)
     const startWallMs = comboWallSync ? calculateVisualSongStartMs(comboWallSync.perfMs, comboWallSync.audioSec, startTime)
@@ -1928,6 +1928,14 @@
       } catch (_) {}
       const rec = { el: motionEl, atMs: startWallMs + noteTimeSec * 1000, gbeat: globalBeat, hit: false, missed: false };
       defNotes.push(rec);
+      // 防御: このノーツのタップ時(判定線到達)に、拍ガイドのゲージを該当セグメントで一瞬光らせ、直後に全消灯。
+      //   → 頭(四分音符)では光らず、タップすべきタイミングだけ光る。持続ハイライトも残さない。
+      (function (arriveMs, seg) {
+        comboTimers.push(setTimeout(function () {
+          updateVisualBeatGuide(seg, true);
+          comboTimers.push(setTimeout(function () { updateVisualBeatGuide(-1, false); }, 110));
+        }, Math.max(0, arriveMs - performance.now())));
+      })(rec.atMs, ((Math.floor(globalBeat) % 4) + 4) % 4);
       // 防御: このノーツが判定線に重なる瞬間(=タップタイミング)に判定ラインを光らせる。
       //   色は落下ノーツに合わせ(頭=黄/裏=水色/シャッフル=紫)、大きい落下物(accent)は強く光る。
       if (hitFlashEl) {
